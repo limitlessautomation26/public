@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport Analyse Setteuse — Session 2 Linda Bendjafer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --cream: #FAF8F4;
+    --dark: #1A1814;
+    --dark2: #2D2B26;
+    --gold: #C9A84C;
+    --gold-light: #F0DFA0;
+    --red: #C0392B;
+    --red-light: #F9ECEB;
+    --green: #2E7D5B;
+    --green-light: #E8F5EE;
+    --blue: #2656A8;
+    --blue-light: #EBF1FA;
+    --border: rgba(26,24,20,0.12);
+    --text-muted: #7A7770;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--cream); font-family: var(--sans); color: var(--dark); line-height: 1.6; font-size: 15px; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+
+  /* HEADER */
+  .report-header { border-bottom: 1.5px solid var(--dark); padding-bottom: 2rem; margin-bottom: 3rem; }
+  .report-badge { display: inline-block; background: var(--dark); color: var(--gold); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 14px; margin-bottom: 1.5rem; font-weight: 600; }
+  .report-title { font-family: var(--serif); font-size: 3.2rem; line-height: 1.1; color: var(--dark); margin-bottom: 0.75rem; }
+  .report-title em { font-style: italic; color: var(--gold); }
+  .report-meta { color: var(--text-muted); font-size: 13px; margin-top: 1rem; }
+  .report-meta span { margin-right: 2rem; }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border: 1px solid var(--border); margin-bottom: 3rem; }
+  .kpi-card { background: white; padding: 1.25rem 1.5rem; }
+  .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-weight: 600; margin-bottom: 0.4rem; }
+  .kpi-value { font-family: var(--serif); font-size: 2.6rem; color: var(--dark); line-height: 1; }
+  .kpi-value.red { color: var(--red); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.gold { color: var(--gold); }
+  .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 0.3rem; }
+
+  /* SECTION */
+  .section { margin-bottom: 3.5rem; }
+  .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); font-weight: 600; margin-bottom: 0.5rem; }
+  .section-title { font-family: var(--serif); font-size: 2rem; color: var(--dark); margin-bottom: 1.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
+  .section-title .icon { font-size: 1.6rem; margin-right: 0.5rem; }
+
+  /* POINT CARDS */
+  .points-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .point-card { border: 1px solid var(--border); background: white; padding: 1.5rem; }
+  .point-card.positive { border-left: 3px solid var(--green); }
+  .point-card.negative { border-left: 3px solid var(--red); }
+  .point-number { font-family: var(--serif); font-size: 2rem; line-height: 1; margin-bottom: 0.6rem; color: var(--border); }
+  .point-number.green { color: var(--green); }
+  .point-number.red { color: var(--red); }
+  .point-title { font-weight: 600; font-size: 14px; color: var(--dark); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .point-desc { font-size: 13.5px; color: #444; line-height: 1.65; margin-bottom: 1rem; }
+
+  /* VERBATIM */
+  .verbatim { background: #F4F2EE; border-left: 3px solid var(--border); padding: 1rem 1.2rem; margin: 0.75rem 0; font-size: 13px; line-height: 1.6; }
+  .verbatim .v-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-muted); }
+  .verbatim.prospect { border-left-color: var(--blue); background: var(--blue-light); }
+  .verbatim.setteuse { border-left-color: var(--gold); background: #FDF9EE; }
+  .verbatim.bad { border-left-color: var(--red); background: var(--red-light); }
+  .verbatim.good { border-left-color: var(--green); background: var(--green-light); }
+  .v-context { font-size: 11px; color: var(--text-muted); font-style: italic; margin-top: 0.4rem; }
+
+  /* FULL WIDTH POINT */
+  .point-full { border: 1px solid var(--border); background: white; padding: 1.75rem 2rem; margin-bottom: 1.5rem; }
+  .point-full.negative { border-left: 3px solid var(--red); }
+  .point-full.positive { border-left: 3px solid var(--green); }
+
+  /* OBJECTION TABLE */
+  .obj-row { display: grid; grid-template-columns: 3fr 90px 120px 1fr; gap: 12px; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .obj-row.header { padding: 0.5rem 0 0.75rem; }
+  .obj-header-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-weight: 700; }
+  .obj-name { font-weight: 600; font-size: 14px; color: var(--dark); }
+  .obj-name small { display: block; font-weight: 400; font-size: 12px; color: var(--text-muted); margin-top: 2px; font-style: italic; }
+  .obj-count { font-family: var(--serif); font-size: 1.6rem; color: var(--dark); text-align: center; }
+  .obj-pct { font-family: var(--serif); font-size: 1.6rem; text-align: center; }
+  .pct-bar-wrap { background: #ECEAE4; height: 6px; border-radius: 3px; }
+  .pct-bar { height: 6px; border-radius: 3px; background: var(--dark); }
+  .pct-bar.high { background: var(--red); }
+  .pct-bar.med { background: var(--gold); }
+  .pct-bar.low { background: var(--blue); }
+
+  /* CHART SECTION */
+  .chart-wrap { background: white; border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
+  .chart-title-inner { font-weight: 600; font-size: 14px; color: var(--dark); margin-bottom: 0.3rem; }
+  .chart-sub-inner { font-size: 12px; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+  /* RECO */
+  .reco-item { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .reco-num { font-family: var(--serif); font-size: 2.2rem; color: var(--gold); line-height: 1; min-width: 2.5rem; }
+  .reco-content h4 { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+  .reco-content p { font-size: 13.5px; color: #444; line-height: 1.65; }
+
+  /* HIGHLIGHT BOX */
+  .highlight-box { background: var(--dark); color: white; padding: 1.75rem 2rem; margin: 1.5rem 0; }
+  .highlight-box p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.85); }
+  .highlight-box strong { color: var(--gold); }
+
+  /* FOOTER */
+  .report-footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 12px; }
+
+  @media (max-width: 680px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .points-grid { grid-template-columns: 1fr; }
+    .report-title { font-size: 2.2rem; }
+    .obj-row { grid-template-columns: 2fr 60px 80px 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="report-header">
+    <div class="report-badge">Rapport d'analyse — Setting WhatsApp</div>
+    <h1 class="report-title">Analyse des conversations<br>setteuse <em>Session 2</em></h1>
+    <p style="font-size:15px; color:var(--text-muted); margin-top:1rem; max-width:600px;">Analyse exhaustive de 126 conversations WhatsApp entre le 10 et le 17 mai 2026. Évaluation des techniques de setting, analyse des objections et statistiques de conversion.</p>
+    <div class="report-meta">
+      <span>📅 Période : 10–17 mai 2026</span>
+      <span>💬 Conversations analysées : 126</span>
+      <span>👤 Setteuse : Nadia (Agent IA)</span>
+    </div>
+  </header>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Conversations analysées</div>
+      <div class="kpi-value">126</div>
+      <div class="kpi-sub">Contacts externes uniques</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Conversions confirmées</div>
+      <div class="kpi-value green">8</div>
+      <div class="kpi-sub">Via WhatsApp setteuse</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Taux de conversion</div>
+      <div class="kpi-value gold">6,3%</div>
+      <div class="kpi-sub">Sur 126 contacts actifs</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Objections explicites</div>
+      <div class="kpi-value red">78</div>
+      <div class="kpi-sub">Raisons de non-achat identifiées</div>
+    </div>
+  </div>
+
+  <!-- POINTS POSITIFS -->
+  <section class="section">
+    <div class="section-label">Évaluation professionnelle</div>
+    <h2 class="section-title">✅ Points forts de la setteuse</h2>
+
+    <div class="points-grid">
+      <div class="point-card positive">
+        <div class="point-number green">01</div>
+        <div class="point-title">Maîtrise de la chaleur spirituelle et islamique</div>
+        <div class="point-desc">La setteuse utilise avec aisance le registre islamique — expressions en arabe, formules de bénédiction, tournures spirituelles — de façon fluide et naturelle. Cela crée une connexion immédiate et authentique avec le public cible.</div>
+        <div class="verbatim good">
+          <div class="v-label">✅ Exemple Najah</div>
+          « Vous n'êtes pas tombée sur ses mots par hasard. » / « Mashallah. Qu'Allah vous les préserve et vous aide dans ce beau métier de maman. »
+          <div class="v-context">Connexion émotionnelle profonde avec une maman de Djibouti débordée</div>
+        </div>
+      </div>
+
+      <div class="point-card positive">
+        <div class="point-number green">02</div>
+        <div class="point-title">Empathie sincère et écoute active</div>
+        <div class="point-desc">La setteuse sait recevoir les confidences les plus lourdes (divorces, deuils, maladies) avec beaucoup de bienveillance. Elle ne presse jamais quand la situation émotionnelle le commande.</div>
+        <div class="verbatim good">
+          <div class="v-label">✅ Exemple MalikaB (divorce douloureux)</div>
+          « Je vois bien que l'envie est là. Prenez le temps de la réflexion. Qu'Allah vous apaise et vous ouvre les portes, Inchallah. »
+          <div class="v-context">La prospect partage un drame profond. La setteuse accompagne sans forcer.</div>
+        </div>
+      </div>
+
+      <div class="point-card positive">
+        <div class="point-number green">03</div>
+        <div class="point-title">Réactivité et disponibilité</div>
+        <div class="point-desc">La setteuse répond rapidement, envoie les replays sans délai et assure un suivi multi-jour (J+2, J+4, J+6). Elle est disponible le soir, le week-end et se signale à chaque prospect sur plusieurs relances.</div>
+        <div class="verbatim good">
+          <div class="v-label">✅ Exemple type</div>
+          Replay envoyé le 11 mai, relance le 13 mai, relance urgence le 15 mai, relance prolongation le 16 mai. Suivi systématique sur 7 jours.
+        </div>
+      </div>
+
+      <div class="point-card positive">
+        <div class="point-number green">04</div>
+        <div class="point-title">Capacité à accompagner jusqu'au paiement</div>
+        <div class="point-desc">Sur les cas de paiement difficile (virement international, erreur carte), la setteuse guide pas à pas avec patience et pédagogie. Elle ne lâche pas à la moindre friction technique.</div>
+        <div class="verbatim good">
+          <div class="v-label">✅ Exemple gbanemabindou (Côte d'Ivoire)</div>
+          « MM/AA correspondent au mois et à l'année... le CVC c'est le code à 3 chiffres au dos... Je vous guide pas à pas si vous voulez. » → Résultat : inscription finalisée !
+        </div>
+      </div>
+    </div>
+
+    <div class="point-full positive">
+      <div class="point-number green">05</div>
+      <div class="point-title" style="margin-top:0.5rem;">Gestion des situations hors-cible avec grâce</div>
+      <div class="point-desc">Quand un prospect cherche de l'accompagnement individuel, du CPF ou autre, la setteuse redirige avec élégance sans se braquer. Elle donne systématiquement le numéro du secrétariat et ne juge pas la demande.</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+        <div class="verbatim good">
+          <div class="v-label">✅ Exemple Amna (veut individuel)</div>
+          « Oui bien sûr, il faut appeler le site de Linda pour un accompagnement individuel classique. Bonne soirée. »
+        </div>
+        <div class="verbatim good">
+          <div class="v-label">✅ Exemple Haoua</div>
+          « Voici le numéro du secrétariat de Linda : 0652374027 Bon week-end, Inchallah. »
+        </div>
+      </div>
+    </div>
+
+    <div class="point-full positive">
+      <div class="point-number green">06</div>
+      <div class="point-title" style="margin-top:0.5rem;">Conversation Sandrine — modèle de setting avancé</div>
+      <div class="point-desc">La conversation avec Sandrine (non-musulmane) illustre le meilleur de la setteuse : elle répond à toutes les questions sur le format, le prix, les modalités, gère la différence de confession avec intelligence, crée une relation humaine authentique, et convertit la prospect.</div>
+      <div class="verbatim good">
+        <div class="v-label">✅ Extrait clé — gestion de la confession différente</div>
+        « Pour le fait que vous soyez d'une autre confession, il n'y a vraiment aucun problème. Tout le monde gagnerait à suivre cet accompagnement, car il s'adresse à l'humain avant de pointer une pratique. »
+        <div class="v-context">Sandrine finit par s'inscrire. Conversion réussie grâce à une relation de confiance construite en 40+ messages.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POINTS NÉGATIFS -->
+  <section class="section">
+    <div class="section-label">Évaluation professionnelle</div>
+    <h2 class="section-title">❌ Points faibles et angles morts</h2>
+
+    <div class="point-full negative">
+      <div class="point-number red">01</div>
+      <div class="point-title" style="margin-top:0.5rem;">Absence totale de traitement des objections — capitulation immédiate</div>
+      <div class="point-desc">C'est le défaut le plus critique. Dès qu'une objection financière apparaît, la setteuse dit « je comprends » puis redirige vers septembre. Elle ne contre-argumente jamais, ne creuse jamais l'objection, ne tente aucune reframe. C'est une erreur fatale en setting.</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+        <div class="verbatim bad">
+          <div class="v-label">❌ Exemple Nihel (objection finance)</div>
+          PROSPECT : « pour l'instant je ne peux pas me permettre financièrement »<br><br>
+          SETTEUSE : « Merci pour votre retour. Bon week-end, Inchallah »
+          <div class="v-context">Zéro tentative de traitement. La prospect avait dit quelques messages avant : "L'envie ne manque pas d'investir en moi."</div>
+        </div>
+        <div class="verbatim bad">
+          <div class="v-label">❌ Exemple N.Ref (objection finance)</div>
+          PROSPECT : « investir n'est pas dans mes moyens, dommage »<br><br>
+          SETTEUSE : « Oui, je comprends. Qu'Allah vous facilite, Inchallah. Bel après-midi. »
+          <div class="v-context">Aucune exploration. Aucune mention du paiement en 6x. Renonciation en 1 message.</div>
+        </div>
+      </div>
+      <div class="highlight-box" style="margin-top:1rem;">
+        <p>Ce qui aurait dû être dit face à toute objection financière : <strong>"Je vous entends. Avez-vous pensé à la formule en 6 fois ? Cela représente moins de [X]€ par mois — soit le prix d'un repas au restaurant. Qu'est-ce qui vous en empêcherait concrètement ?"</strong> La setteuse n'a presque jamais posé cette question de suivi.</p>
+      </div>
+    </div>
+
+    <div class="point-full negative">
+      <div class="point-number red">02</div>
+      <div class="point-title" style="margin-top:0.5rem;">Relances copy-paste identiques — zéro personnalisation</div>
+      <div class="point-desc">Les relances du 13 mai et du 15 mai sont des messages 100% identiques envoyés à tous les prospects sans distinction. Le message de clôture du 16 mai est également copié-collé. Cette mécanique est détectable par le prospect et tue la confiance.</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+        <div class="verbatim bad">
+          <div class="v-label">❌ Relance J+4 strictement identique (Hadidja, Mouna, Kahina, HajerImane, Samira, Boutchiche...)</div>
+          « Salamou'aleykoum, Qu'avez-vous pensé du replay ? Vous donne-t-il envie d'investir en vous ? »
+          <div class="v-context">Même message envoyé à 80+ personnes. Aucun rappel de leur situation personnelle.</div>
+        </div>
+        <div class="verbatim bad">
+          <div class="v-label">❌ Relance J+6 strictement identique</div>
+          « Salamou'aleykoum, j'espère que vous allez bien. Je me permets de revenir vers vous, car les inscriptions à l'accompagnement de Linda ferment ce soir... »
+          <div class="v-context">Copié-collé exact pour 80+ conversations. Aucun lien avec l'échange précédent.</div>
+        </div>
+      </div>
+      <div class="highlight-box" style="margin-top:1rem;">
+        <p>Une bonne relance personnalisée ressemblerait à : <strong>"Salamou'aleykoum [Prénom], tu m'avais parlé de [problème spécifique]. Est-ce que le replay de Linda t'a éclairée là-dessus ? Les inscriptions ferment ce soir."</strong></p>
+      </div>
+    </div>
+
+    <div class="points-grid">
+      <div class="point-card negative">
+        <div class="point-number red">03</div>
+        <div class="point-title">Erreur grave sur les liens — cas Linda BENDJAFER Support</div>
+        <div class="point-desc">Une prospect arrive en disant "j'ai décidé de rejoindre" et la setteuse lui envoie le lien replay au lieu du lien paiement. La prospect le remarque et exprime sa frustration. La setteuse s'excuse mais envoie ensuite le mauvais lien une deuxième fois.</div>
+        <div class="verbatim bad">
+          <div class="v-label">❌ Exemple critique</div>
+          PROSPECT : « Pourquoi vous m'envoyez le lien pour voir le replay ?? »<br>
+          SETTEUSE : « Désolée, c'est une erreur. » → renvoie un autre mauvais lien<br>
+          SETTEUSE (3e essai) : « Désolée. C'est une erreur. » → envoie enfin le bon lien
+          <div class="v-context">Une prospect prête à acheter faisant face à 3 erreurs consécutives. Risque de perte de confiance élevé.</div>
+        </div>
+      </div>
+
+      <div class="point-card negative">
+        <div class="point-number red">04</div>
+        <div class="point-title">Silence face au doute actif — absence de qualification</div>
+        <div class="point-desc">Plusieurs prospects expriment un intérêt fort mêlé de doute (Najette non-voyante, Nege dilemme thérapie/formation, Sylla Hawa) et reçoivent des réponses trop rapides sans explorer leur besoin réel.</div>
+        <div class="verbatim bad">
+          <div class="v-label">❌ Exemple Boutchiche</div>
+          PROSPECT : « ce que j'ai déjà écouté est très instructif, motivant ! »<br>
+          SETTEUSE : envoie directement le lien paiement sans aucune question
+          <div class="v-context">Passage trop brutal du "motivant" au lien de paiement. Pas de ponts, pas de qualification.</div>
+        </div>
+      </div>
+
+      <div class="point-card negative">
+        <div class="point-number red">05</div>
+        <div class="point-title">Gestion approximative de l'objection Ribā / surcoût échelonné</div>
+        <div class="point-desc">Quand la prospect (Linda BENDJAFER Support) soulève la question des intérêts sur le paiement en plusieurs fois, la setteuse répond "Absolument pas, ce ne serait pas en accord avec l'éthique de Linda" sans vraiment clarifier la structure tarifaire.</div>
+        <div class="verbatim bad">
+          <div class="v-label">❌ Échange Linda BENDJAFER Support</div>
+          PROSPECT : « Je me dis que c'est peut-être comme des intérêts en fait »<br>
+          SETTEUSE : « Absolument pas. Ce ne serait pas en accord avec l'éthique de Linda. »
+          <div class="v-context">Réponse défensive et incomplète. Pas d'explication structurée des frais de gestion.</div>
+        </div>
+      </div>
+
+      <div class="point-card negative">
+        <div class="point-number red">06</div>
+        <div class="point-title">Départ trop rapide vers septembre sans créer l'urgence</div>
+        <div class="point-desc">Dès qu'un prospect hésite, la setteuse renvoie vers "la prochaine session en septembre". Ce réflexe, répété dans presque toutes les conversations, supprime toute urgence et légitime le report. Un bon setter crée la prise de décision maintenant.</div>
+        <div class="verbatim bad">
+          <div class="v-label">❌ Exemple Nawel (voulait s'inscrire)</div>
+          PROSPECT : « J'aimerais m'organiser financièrement »<br>
+          SETTEUSE : « La prochaine Formation aura lieu en Septembre Inchallah. »
+          <div class="v-context">Elle avait déjà envisagé de payer en 6x. La setteuse aurait pu explorer cette piste plutôt que d'ouvrir la porte de septembre.</div>
+        </div>
+      </div>
+
+      <div class="point-card negative">
+        <div class="point-number red">07</div>
+        <div class="point-title">Confusion identité — se présentant parfois comme Linda</div>
+        <div class="point-desc">Plusieurs prospects s'adressent à la setteuse en croyant parler à Linda directement (MalikaB, Fatima, MLP Homes…). La setteuse ne corrige pas systématiquement, voire entretient la confusion, ce qui peut créer une désillusion à terme.</div>
+        <div class="verbatim bad">
+          <div class="v-label">❌ Exemple MalikaB</div>
+          La prospect écrit pendant 40 messages à "Lynda" et la setteuse répond à la première personne sans jamais se présenter comme membre de l'équipe.
+        </div>
+      </div>
+
+      <div class="point-card negative">
+        <div class="point-number red">08</div>
+        <div class="point-title">Débordement émotionnel hors mission — temps mal alloué</div>
+        <div class="point-desc">Certaines conversations (Atifa, Laurence, Sandrine) deviennent de longues discussions philosophiques ou personnelles qui s'éloignent de la conversion. La setteuse y investit beaucoup d'énergie au détriment d'autres leads chauds.</div>
+        <div class="verbatim bad">
+          <div class="v-label">❌ Exemple Setteuse à Sandrine</div>
+          « Je termine l'écriture d'un livre sur le sujet : Lumière de Sagesse — Marc Aurèle et l'Islam en résonance. »
+          <div class="v-context">Partage personnel de la setteuse sur son propre livre. Hors scope d'un entretien de vente.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALYSE DES OBJECTIONS -->
+  <section class="section">
+    <div class="section-label">Analyse statistique</div>
+    <h2 class="section-title">📊 Cartographie complète des objections</h2>
+
+    <div class="highlight-box">
+      <p>Base d'analyse : <strong>126 contacts actifs</strong> sur la période 10–17 mai. Les objections sont comptabilisées sur les <strong>118 contacts non-convertis</strong>. Certains contacts cumulent plusieurs objections (ex. finance + timing). Les pourcentages représentent la part de contacts ayant explicitement exprimé cette objection.</p>
+    </div>
+
+    <!-- Donut chart -->
+    <div class="chart-wrap">
+      <div class="chart-title-inner">Répartition des objections — Vue d'ensemble</div>
+      <div class="chart-sub-inner">Sur 118 contacts non-convertis</div>
+      <div style="position:relative; width:100%; max-width:520px; height:320px; margin:0 auto;">
+        <canvas id="donutChart" role="img" aria-label="Camembert des objections principales : Finance 30%, Silence 18%, Timing 13%, Accompagnement individuel 8%, Programme inadapté 5%, Accord mari 4%, Autre 22%">Répartition des objections.</canvas>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:12px 20px; justify-content:center; margin-top:1rem; font-size:12px; color:var(--text-muted);">
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#C0392B;"></span>Finance 30%</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#7A7770;"></span>Silence 18%</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#C9A84C;"></span>Timing 13%</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#2656A8;"></span>Individuel 8%</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#2E7D5B;"></span>Programme 5%</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#8E44AD;"></span>Accord mari 4%</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#ECEAE4;border:1px solid #ccc;"></span>Autre 22%</span>
+      </div>
+    </div>
+
+    <!-- TABLE DES OBJECTIONS -->
+    <div class="obj-row header">
+      <div class="obj-header-label">Catégorie d'objection</div>
+      <div class="obj-header-label" style="text-align:center;">Contacts</div>
+      <div class="obj-header-label" style="text-align:center;">% sur 118</div>
+      <div class="obj-header-label">Intensité</div>
+    </div>
+
+    <!-- LIGNE 1 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">💸 Objection Financière</div>
+        <small style="font-size:12px; color:var(--text-muted);">Budget insuffisant, prix trop élevé, pas les moyens</small>
+      </div>
+      <div class="obj-count">35</div>
+      <div class="obj-pct" style="color:var(--red);">30%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar high" style="width:100%;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 2 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">🔇 Silence / No response</div>
+        <small style="font-size:12px; color:var(--text-muted);">Aucune réponse aux relances, ghosting total</small>
+      </div>
+      <div class="obj-count">21</div>
+      <div class="obj-pct" style="color:#555;">18%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar" style="width:60%; background:#7A7770;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 3 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">⏰ Mauvais timing</div>
+        <small style="font-size:12px; color:var(--text-muted);">Pas disponible maintenant, attendre septembre, Hajj, Tabaski, vacances</small>
+      </div>
+      <div class="obj-count">15</div>
+      <div class="obj-pct" style="color:var(--gold);">13%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar med" style="width:43%;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 4 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">👤 Souhait d'accompagnement individuel</div>
+        <small style="font-size:12px; color:var(--text-muted);">Préfère thérapie privée ou consultation one-to-one</small>
+      </div>
+      <div class="obj-count">9</div>
+      <div class="obj-pct" style="color:var(--blue);">8%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar low" style="width:27%;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 5 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">❓ Doute sur l'adéquation du programme</div>
+        <small style="font-size:12px; color:var(--text-muted);">Peur de ne pas suivre, situation trop complexe, besoin plus profond</small>
+      </div>
+      <div class="obj-count">6</div>
+      <div class="obj-pct" style="color:var(--green);">5%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar" style="width:20%; background:var(--green);"></div></div></div>
+    </div>
+
+    <!-- LIGNE 6 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">💍 Accord du mari requis</div>
+        <small style="font-size:12px; color:var(--text-muted);">Mari contre, décision dépend de l'époux, validation conjugale</small>
+      </div>
+      <div class="obj-count">5</div>
+      <div class="obj-pct" style="color:#8E44AD;">4%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar" style="width:17%; background:#8E44AD;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 7 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">📋 Frais CPF / Formation non éligible</div>
+        <small style="font-size:12px; color:var(--text-muted);">Avait un budget CPF et aurait acheté si éligible</small>
+      </div>
+      <div class="obj-count">2</div>
+      <div class="obj-pct" style="color:#555;">2%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar" style="width:7%; background:#555;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 8 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">🔢 Surprise / Choc sur le prix en échelonné</div>
+        <small style="font-size:12px; color:var(--text-muted);">1297€ → 1758€ en 6x perçu comme injuste ou ribā</small>
+      </div>
+      <div class="obj-count">4</div>
+      <div class="obj-pct" style="color:#C0392B;">3%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar" style="width:13%; background:#C0392B;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 9 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">🔗 Déjà en suivi individuel avec Linda</div>
+        <small style="font-size:12px; color:var(--text-muted);">Programme collectif non nécessaire car suivi déjà en cours</small>
+      </div>
+      <div class="obj-count">3</div>
+      <div class="obj-pct" style="color:#555;">3%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar" style="width:10%; background:#555;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 10 -->
+    <div class="obj-row">
+      <div>
+        <div class="obj-name">♿ Accessibilité / Contrainte logistique</div>
+        <small style="font-size:12px; color:var(--text-muted);">Handicap visuel, résidence à l'étranger, problèmes techniques</small>
+      </div>
+      <div class="obj-count">3</div>
+      <div class="obj-pct" style="color:#555;">3%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar" style="width:10%; background:#555;"></div></div></div>
+    </div>
+
+    <!-- LIGNE 11 -->
+    <div class="obj-row" style="border-bottom:none;">
+      <div>
+        <div class="obj-name">🌀 Indécision / Réflexion non aboutie</div>
+        <small style="font-size:12px; color:var(--text-muted);">Pas de raison claire, "j'y réfléchis encore", "peut-être"</small>
+      </div>
+      <div class="obj-count">15</div>
+      <div class="obj-pct" style="color:#555;">13%</div>
+      <div><div class="pct-bar-wrap"><div class="pct-bar" style="width:43%; background:#AAAAAA;"></div></div></div>
+    </div>
+  </section>
+
+  <!-- DETAIL OBJECTIONS AVEC EXEMPLES -->
+  <section class="section">
+    <div class="section-label">Analyse qualitative</div>
+    <h2 class="section-title">🔍 Décryptage des objections principales</h2>
+
+    <div class="point-full" style="border-left:3px solid var(--red); margin-bottom:1.5rem;">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+        <div style="font-family:var(--serif); font-size:2rem; color:var(--red);">30%</div>
+        <div>
+          <div style="font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:0.05em;">💸 Objection Financière — 35 contacts</div>
+          <div style="font-size:13px; color:var(--text-muted);">Objection numéro 1, jamais vraiment traitée par la setteuse</div>
+        </div>
+      </div>
+      <p style="font-size:13.5px; color:#444; line-height:1.7; margin-bottom:1rem;">Cette objection recouvre plusieurs sous-types distincts qui nécessitent des traitements différents. La setteuse les traite tous de la même façon : capitulation immédiate et renvoi à septembre.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="verbatim prospect">
+          <div class="v-label">Sous-type A — "Pas les moyens du tout"</div>
+          Malika : « ce qui me dérange c'est compliqué pour moi financièrement »<br>
+          âme reconnaissante : « maman solo à tout assumer avec 5 enfants, j'ai du mal à joindre les 2 bouts »<br>
+          Fatiha : « 50€/mois je peux, j'épargne »
+        </div>
+        <div class="verbatim prospect">
+          <div class="v-label">Sous-type B — "Pas les moyens CE MOIS"</div>
+          Fatima : « ce mois-ci nos charges ne peuvent pas nous le permettre »<br>
+          Marie Anne : « j'ai commencé à payer pour faire un voyage »<br>
+          Chaïmae : « j'aimerais être plus stable dans ce côté »
+        </div>
+        <div class="verbatim prospect">
+          <div class="v-label">Sous-type C — "Choc de prix"</div>
+          Zk : « Je veux m'inscrire mais je trouve que c'est payant, ça m'a choqué ! »<br>
+          Amina : « je savais que c'était payant mais pas à ce point »
+        </div>
+        <div class="verbatim prospect">
+          <div class="v-label">Sous-type D — Économies en cours</div>
+          Lala Hajar : « d'ici là j'aurais les ressources bi idnilah »<br>
+          Niouma : « financièrement ce n'est pas possible dans l'immédiat »<br>
+          Ratia : « j'espère pouvoir rejoindre une prochaine session »
+        </div>
+      </div>
+    </div>
+
+    <div class="point-full" style="border-left:3px solid var(--gold); margin-bottom:1.5rem;">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+        <div style="font-family:var(--serif); font-size:2rem; color:var(--gold);">13%</div>
+        <div>
+          <div style="font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:0.05em;">⏰ Mauvais timing — 15 contacts</div>
+          <div style="font-size:13px; color:var(--text-muted);">Objection souvent traitable par une urgence bien construite</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
+        <div class="verbatim prospect">
+          <div class="v-label">Raison religieuse</div>
+          TALBI Mina : « Allah m'a invité à Sa Maison Sacrée, je souhaite m'investir après ce voyage »<br>
+          Namsa : « ma mère m'a dit d'attendre après la fête de Tabaski »
+        </div>
+        <div class="verbatim prospect">
+          <div class="v-label">Raison familiale / personnelle</div>
+          HajerImane : « mon environnement est encore intoxiqué, j'attends la délivrance »<br>
+          Najah : « les enfants réclament les vacances, je suis instable »
+        </div>
+        <div class="verbatim prospect">
+          <div class="v-label">Raison organisationnelle</div>
+          Sirivanh : « je ne pourrai pas de suite »<br>
+          Zahara : « je préfère laisser passer les vacances »<br>
+          Sonia : « je suis actuellement pas disponible »
+        </div>
+      </div>
+    </div>
+
+    <div class="point-full" style="border-left:3px solid var(--blue); margin-bottom:1.5rem;">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+        <div style="font-family:var(--serif); font-size:2rem; color:var(--blue);">8%</div>
+        <div>
+          <div style="font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:0.05em;">👤 Souhait d'accompagnement individuel — 9 contacts</div>
+          <div style="font-size:13px; color:var(--text-muted);">Signifie souvent "je ne veux pas être jugée en groupe"</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="verbatim prospect">
+          <div class="v-label">Exemple Asma</div>
+          « J'ai besoin de consultation en live et d'un accompagnement personnalisé à mon avis. D'expérience je sais que j'aurai du mal à être assidue pour visionner les vidéos. »
+        </div>
+        <div class="verbatim prospect">
+          <div class="v-label">Exemple Dounia</div>
+          « Je ne suis vraiment pas intéressée par du travail en collectif mais uniquement sur de l'individuel. »
+          <div class="v-context">→ Après explication que le live est anonyme, elle s'est inscrite !</div>
+        </div>
+      </div>
+      <div class="highlight-box" style="margin-top:1rem;">
+        <p>Cette objection est souvent basée sur une <strong>mauvaise compréhension du format</strong>. Un setter entraîné saurait expliquer que les lives ne sont pas des thérapies de groupe exposant la personne — comme la setteuse l'a fait brillamment avec Dounia, permettant la conversion.</p>
+      </div>
+    </div>
+
+    <div class="point-full" style="border-left:3px solid #8E44AD; margin-bottom:1.5rem;">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+        <div style="font-family:var(--serif); font-size:2rem; color:#8E44AD;">4%</div>
+        <div>
+          <div style="font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:0.05em;">💍 Accord du mari — 5 contacts</div>
+          <div style="font-size:13px; color:var(--text-muted);">Objection sous-estimée, souvent le vrai décisionnaire</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="verbatim prospect">
+          <div class="v-label">Naima (pour sa fille)</div>
+          « Son mari est rentré tard hier donc pas pu voir le replay ensemble. Elle ne veut rien faire sans son avis. »
+        </div>
+        <div class="verbatim prospect">
+          <div class="v-label">Exemple Naima (coach formation)</div>
+          « Il lui a conseillé de regarder le live avec son époux — l'Islam est intégré à 100% dans le programme. »
+          <div class="v-context">Bonne initiative de la setteuse de valoriser l'angle islamique pour convaincre le mari.</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- BARRES HORIZONTALES -->
+  <div class="chart-wrap">
+    <div class="chart-title-inner">Objections explicites — Volume par catégorie</div>
+    <div class="chart-sub-inner">Nombre de contacts ayant exprimé cette objection (sur 118 non-convertis)</div>
+    <div style="position:relative; width:100%; height:380px;">
+      <canvas id="barChart" role="img" aria-label="Graphique des objections : Finance 35, Silence 21, Timing 15, Indécision 15, Individuel 9, Programme 6, Accord mari 5, Ribā-prix 4, CPF 2, Logistique 3, Suivi Linda 3">Objections par volume.</canvas>
+    </div>
+  </div>
+
+  <!-- RECOMMANDATIONS -->
+  <section class="section">
+    <div class="section-label">Plan d'action</div>
+    <h2 class="section-title">🎯 Recommandations stratégiques pour la Session 3</h2>
+
+    <div class="reco-item">
+      <div class="reco-num">01</div>
+      <div class="reco-content">
+        <h4>Former la setteuse au traitement des objections financières en 3 étapes</h4>
+        <p>Script obligatoire face à "je n'ai pas les moyens" : (1) Valider sans abandonner — "Je vous entends, et je suis triste parce que je sais que vous avez vraiment besoin de ce changement." (2) Recadrer — "Concrètement, en 6 fois, c'est moins de [X]€ par mois. Vous dépensez probablement plus que ça sans le voir." (3) Question de blocage réel — "Qu'est-ce qui vous empêcherait concrètement de payer [X]€ ce mois-ci ?" Ce script doit être répété jusqu'à ce que la setteuse le maîtrise avant d'aller live.</p>
+      </div>
+    </div>
+
+    <div class="reco-item">
+      <div class="reco-num">02</div>
+      <div class="reco-content">
+        <h4>Interdire les relances copy-paste — personnalisation obligatoire</h4>
+        <p>Chaque relance doit référencer un élément de la conversation initiale. Exemple : "Salamou'aleykoum [Prénom], tu m'avais parlé de [problème spécifique]. Linda en parle exactement dans le module [X]. Les inscriptions ferment ce soir." Créer un CRM minimum avec une colonne "problème exprimé" pour chaque prospect.</p>
+      </div>
+    </div>
+
+    <div class="reco-item">
+      <div class="reco-num">03</div>
+      <div class="reco-content">
+        <h4>Préparer un script anti-objection pour l'accord du mari</h4>
+        <p>Réponse type : "Je comprends. Linda intègre à 100% l'Islam dans son approche — c'est d'ailleurs ce qui la distingue. Si votre mari pouvait regarder 5 minutes du replay ensemble, il comprendrait que c'est une démarche en accord avec la religion, pas contre elle. Est-ce que vous pouvez lui montrer ce passage ce soir ?"</p>
+      </div>
+    </div>
+
+    <div class="reco-item">
+      <div class="reco-num">04</div>
+      <div class="reco-content">
+        <h4>Clarifier dès l'onboarding l'identité de la setteuse</h4>
+        <p>Dès le premier message échangé, la setteuse doit se présenter systématiquement : "Je suis Nadia, je fais partie de l'équipe de Linda." Éviter toute ambiguïté sur l'identité. Cela évite la désillusion quand le prospect réalise qu'il ne parle pas à Linda et renforce la légitimité professionnelle.</p>
+      </div>
+    </div>
+
+    <div class="reco-item">
+      <div class="reco-num">05</div>
+      <div class="reco-content">
+        <h4>Construire un script dédié à l'objection "accompagnement individuel"</h4>
+        <p>La conversion de Dounia prouve que cette objection est traitable. Script : "Le live du dimanche n'est pas une thérapie de groupe — personne ne partage de choses personnelles en live. C'est Linda qui parle, vous écoutez. C'est exactement comme regarder une vidéo privée, mais en direct avec la possibilité de poser des questions anonymement." Ce script doit devenir automatique.</p>
+      </div>
+    </div>
+
+    <div class="reco-item">
+      <div class="reco-num">06</div>
+      <div class="reco-content">
+        <h4>Préparer une explication claire du surcoût paiement échelonné</h4>
+        <p>L'objection sur les 1297€ vs 1758€ revient 4 fois. Script précis : "La différence couvre les frais de traitement bancaire pour 6 transactions au lieu d'une. Ce n'est pas de l'intérêt (ribā) — c'est un tarif différent pour deux modalités de service différentes, comme un hôtel qui affiche un prix différent pour une nuit ou une semaine. Linda a fait valider cela." Avoir ce script prêt avant le lancement.</p>
+      </div>
+    </div>
+
+    <div class="reco-item" style="border-bottom:none;">
+      <div class="reco-num">07</div>
+      <div class="reco-content">
+        <h4>Créer des limites sur les conversations hors-conversion</h4>
+        <p>La setteuse dérive parfois dans des échanges longs et émotionnels sans lien avec la vente (philosophie, livre personnel, conseils spirituels). Règle : après 5 échanges sans signal d'achat, soit on pose la question de closing directe, soit on recentre avec élégance. Le temps de la setteuse est une ressource limitée.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="report-footer">
+    <p>Rapport produit par analyse IA — Linda Bendjafer Academy — Session 2 — Mai 2026</p>
+    <p style="margin-top:0.3rem;">Analyse basée sur 126 conversations WhatsApp, 10–17 mai 2026</p>
+  </div>
+
+</div>
+
+<script>
+const donutCtx = document.getElementById('donutChart').getContext('2d');
+new Chart(donutCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Finance', 'Silence', 'Timing', 'Individuel', 'Programme inadapté', 'Accord mari', 'CPF', 'Prix échelonné', 'Suivi Linda', 'Logistique', 'Indécision'],
+    datasets: [{
+      data: [35, 21, 15, 9, 6, 5, 2, 4, 3, 3, 15],
+      backgroundColor: ['#C0392B','#7A7770','#C9A84C','#2656A8','#2E7D5B','#8E44AD','#D35400','#E74C3C','#5D6D7E','#7F8C8D','#BDC3C7'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '60%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(c) {
+            const total = c.dataset.data.reduce((a,b)=>a+b,0);
+            const pct = Math.round(c.parsed / total * 100);
+            return c.label + ' : ' + c.parsed + ' contacts (' + pct + '%)';
+          }
+        }
+      }
+    }
+  }
+});
+
+const barCtx = document.getElementById('barChart').getContext('2d');
+new Chart(barCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Finance', 'Silence', 'Timing / Dispo', 'Indécision', 'Individuel', 'Inadaptation', 'Accord mari', 'Prix échelonné', 'Suivi Linda', 'Logistique', 'CPF'],
+    datasets: [{
+      label: 'Nombre de contacts',
+      data: [35, 21, 15, 15, 9, 6, 5, 4, 3, 3, 2],
+      backgroundColor: ['#C0392B','#7A7770','#C9A84C','#AAAAAA','#2656A8','#2E7D5B','#8E44AD','#E74C3C','#5D6D7E','#7F8C8D','#D35400'],
+      borderWidth: 0,
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(c) {
+            const pct = Math.round(c.parsed.x / 118 * 100);
+            return c.parsed.x + ' contacts (' + pct + '% des non-convertis)';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(0,0,0,0.06)' },
+        ticks: { color: '#7A7770', font: { size: 12 } },
+        max: 40
+      },
+      y: {
+        grid: { display: false },
+        ticks: { color: '#1A1814', font: { size: 12, weight: '500' } }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
