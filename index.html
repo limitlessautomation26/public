@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche de travail — Semaine du 26 mai 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --border: #E2E0DA;
+    --border-strong: #C8C6BE;
+    --text-primary: #1A1916;
+    --text-secondary: #6B6960;
+    --text-muted: #A09E97;
+    --purple: #534AB7;
+    --purple-light: #EEEDFE;
+    --purple-mid: #AFA9EC;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --teal-mid: #5DCAA5;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --green: #3B6D11;
+    --green-light: #EAF3DE;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    padding: 2rem 1rem;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .header-left .title {
+    font-size: 1.375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .header-left .subtitle {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge-purple { background: var(--purple-light); color: var(--purple); }
+  .badge-teal   { background: var(--teal-light);   color: var(--teal);   }
+  .badge-amber  { background: var(--amber-light);  color: var(--amber);  }
+  .meta-row {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-top: 0.875rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid var(--border);
+  }
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  /* CONTEXT BLOCK */
+  .context-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--purple);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .context-block .block-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--purple);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .context-block p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  /* BASE DE CONNAISSANCE */
+  .bdc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: var(--radius-sm);
+    padding: 1.125rem 1.25rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .bdc-left { display: flex; gap: 12px; align-items: flex-start; flex: 1; min-width: 0; }
+  .bdc-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+  .bdc-title { font-size: 0.9375rem; font-weight: 600; color: var(--teal); margin-bottom: 5px; }
+  .bdc-desc { font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; }
+  .bdc-steps {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    font-size: 0.75rem;
+  }
+  .bdc-steps .step {
+    background: var(--teal-light);
+    color: var(--teal);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .bdc-steps .arrow { color: var(--text-muted); font-size: 0.8rem; }
+  .bdc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--teal);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-self: center;
+    transition: opacity 0.15s;
+  }
+  .bdc-btn:hover { opacity: 0.88; }
+
+  /* NICHES */
+  .niches-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .niche-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+  }
+  .niche-num {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+    font-family: 'DM Mono', monospace;
+  }
+  .niche-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    line-height: 1.35;
+  }
+  .niche-desc {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ASSOCIATE GRID */
+  .associates-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .associate-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .associate-header {
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .h-card .associate-header { background: var(--purple-light); border-bottom: 1px solid #CECBF6; }
+  .o-card .associate-header { background: var(--teal-light);   border-bottom: 1px solid #9FE1CB; }
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .h-card .avatar { background: var(--purple-mid); color: #26215C; }
+  .o-card .avatar { background: var(--teal-mid);   color: #04342C; }
+  .assoc-name { font-size: 0.9375rem; font-weight: 600; }
+  .h-card .assoc-name { color: #3C3489; }
+  .o-card .assoc-name { color: var(--teal); }
+  .assoc-role { font-size: 0.75rem; margin-top: 1px; }
+  .h-card .assoc-role { color: var(--purple); }
+  .o-card .assoc-role { color: var(--teal); }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 6px 1.25rem;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* TASKS */
+  .tasks-list {
+    padding: 0.875rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .task-check {
+    width: 17px;
+    height: 17px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .task-check:hover { border-color: var(--purple); }
+  .task-check.done {
+    background: var(--purple);
+    border-color: var(--purple);
+    position: relative;
+  }
+  .task-check.done::after {
+    content: '';
+    position: absolute;
+    left: 3px; top: 1px;
+    width: 8px; height: 5px;
+    border-left: 1.5px solid #fff;
+    border-bottom: 1.5px solid #fff;
+    transform: rotate(-45deg);
+  }
+  .task-content { flex: 1; }
+  .task-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.45;
+  }
+  .task-detail {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    line-height: 1.55;
+  }
+
+  /* DELIVERABLES */
+  .deliverable-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: var(--radius-sm);
+    padding: 1.125rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .deliverable-card .block-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.875rem;
+  }
+  .deliverable-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .d-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+  }
+  .d-num {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 4px;
+  }
+  .d-value {
+    font-size: 0.8375rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+
+  /* WARNING */
+  .warning-card {
+    background: var(--amber-light);
+    border: 1px solid #FAC775;
+    border-radius: var(--radius-sm);
+    padding: 0.875rem 1.25rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .warning-icon { font-size: 1.125rem; flex-shrink: 0; margin-top: 1px; }
+  .warning-card p { font-size: 0.8375rem; color: #633806; line-height: 1.55; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+  }
+
+  @media (max-width: 600px) {
+    .associates-grid { grid-template-columns: 1fr; }
+    .niches-grid { grid-template-columns: 1fr; }
+    .deliverable-grid { grid-template-columns: 1fr 1fr; }
+    .header { flex-direction: column; }
+    .header-right { align-items: flex-start; }
+  }
+  @media print {
+    body { background: white; padding: 0; }
+    .task-check { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="title">Fiche de travail — Semaine du 26 mai 2026</div>
+      <div class="subtitle">Projet IA & Automatisation · Communauté Musulmane Francophone</div>
+      <div class="meta-row">
+        <div class="meta-item">👥 Hicham + Ouabi</div>
+        <div class="meta-item">⏱ ~5–7h chacun cette semaine</div>
+        <div class="meta-item">📍 Phase : Bases solides</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="badge badge-purple">📅 Réunion S+1 : Sam. 31 mai · 10h–12h</span>
+    </div>
+  </div>
+
+  <!-- CONTEXT -->
+  <div class="context-block">
+    <div class="block-title">🎯 Focus de la semaine</div>
+    <p>On pose des bases solides : une étude de marché sérieuse, des personas approfondis pour chaque niche, et une offre irrésistible qui répond aux 3 niches avec un seul produit. Hicham et Ouabi font exactement les mêmes tâches chacun de leur côté, puis on croise les analyses le samedi 31 mai.</p>
+  </div>
+
+  <!-- BASE DE CONNAISSANCE -->
+  <div class="bdc-card">
+    <div class="bdc-left">
+      <div class="bdc-icon">📄</div>
+      <div>
+        <div class="bdc-title">Base de connaissance du projet</div>
+        <div class="bdc-desc">Importez ce document dans votre projet Claude avant de commencer. Il contient tout le contexte du projet : niches, personas, offre, stratégie. Claude pourra vous aider à réaliser chaque tâche de la semaine avec la bonne base de départ.</div>
+        <div class="bdc-steps">
+          <span class="step">1. Télécharger le doc</span>
+          <span class="arrow">→</span>
+          <span class="step">2. Créer un projet Claude</span>
+          <span class="arrow">→</span>
+          <span class="step">3. Importer le fichier</span>
+          <span class="arrow">→</span>
+          <span class="step">4. Travailler chaque tâche avec Claude</span>
+        </div>
+      </div>
+    </div>
+    <a class="bdc-btn" href="https://docs.google.com/document/d/1WIoe6xaw3tIYs5pHwfilkicKXCr28-lx/edit?usp=sharing&ouid=104009122233007508544&rtpof=true&sd=true" target="_blank">
+      ⬇ Ouvrir la base de connaissance
+    </a>
+  </div>
+
+  <!-- NICHES -->
+  <div class="niches-grid">
+    <div class="niche-card">
+      <div class="niche-num">Niche 01</div>
+      <div class="niche-title">L'Entrepreneur existant qui ignore l'IA</div>
+      <div class="niche-desc">Business actuel, veut automatiser et scaler. Avatar : Yassine.</div>
+    </div>
+    <div class="niche-card">
+      <div class="niche-num">Niche 02 — modifiée</div>
+      <div class="niche-title">Cherche à se libérer ou développer un business IA</div>
+      <div class="niche-desc">Quitter son emploi ou proposer des prestations IA. Avatar : Hamza.</div>
+    </div>
+    <div class="niche-card">
+      <div class="niche-num">Niche 03</div>
+      <div class="niche-title">A une idée sans compétences ni budget</div>
+      <div class="niche-desc">Veut développer son outil ou son app. Avatar : Soraya.</div>
+    </div>
+  </div>
+
+  <!-- ASSOCIATES -->
+  <div class="associates-grid">
+
+    <!-- HICHAM -->
+    <div class="associate-card h-card">
+      <div class="associate-header">
+        <div class="avatar">Hi</div>
+        <div>
+          <div class="assoc-name">Hicham</div>
+          <div class="assoc-role">Associé 1 — Expert Opérationnel</div>
+        </div>
+      </div>
+
+      <div class="section-label">Tâche 1 — Étude de marché</div>
+      <div class="tasks-list">
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Lister toutes les offres concurrentes IA</div>
+            <div class="task-detail">Formations et accompagnements existants : agence IA, freelance IA, no-code IA… Pour chaque offre : nom, prix, promesse, format, points forts et points faibles.</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Identifier les angles non occupés</div>
+            <div class="task-detail">Ce qui n'existe pas encore, notamment sur la communauté musulmane francophone. Qu'est-ce qui différencie notre positionnement ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Tâche 2 — Personas (3 niches)</div>
+      <div class="tasks-list">
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Fiche persona — Niche 1 : Yassine</div>
+            <div class="task-detail">Entrepreneur existant. Douleurs profondes, déclencheurs d'achat, objections, mots exacts qu'il utilise.</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Fiche persona — Niche 2 : Hamza</div>
+            <div class="task-detail">Cherche à se libérer ou à proposer des prestations IA. Douleurs, déclencheurs, objections. Qu'est-ce qu'il veut : liberté ? revenus ? statut ?</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Fiche persona — Niche 3 : Soraya</div>
+            <div class="task-detail">A une idée bloquée faute de compétences/budget. Douleurs, déclencheurs, objections. Qu'est-ce qui l'a empêchée jusqu'ici ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Tâche 3 — Offre irrésistible</div>
+      <div class="tasks-list">
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Construire l'offre unique qui parle aux 3 niches</div>
+            <div class="task-detail">Promesse centrale, résultats concrets par niche, compétences transmises, modules clés, bonus, garantie. Un seul produit, trois chemins vers le résultat.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUABI -->
+    <div class="associate-card o-card">
+      <div class="associate-header">
+        <div class="avatar">Ou</div>
+        <div>
+          <div class="assoc-name">Ouabi</div>
+          <div class="assoc-role">Associé 2 — Visage & Audience</div>
+        </div>
+      </div>
+
+      <div class="section-label">Tâche 1 — Étude de marché</div>
+      <div class="tasks-list">
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Lister toutes les offres concurrentes IA</div>
+            <div class="task-detail">Formations et accompagnements existants : agence IA, freelance IA, no-code IA… Pour chaque offre : nom, prix, promesse, format, points forts et points faibles.</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Identifier les angles non occupés</div>
+            <div class="task-detail">Ce qui n'existe pas encore, notamment sur la communauté musulmane francophone. Qu'est-ce qui différencie notre positionnement ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Tâche 2 — Personas (3 niches)</div>
+      <div class="tasks-list">
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Fiche persona — Niche 1 : Yassine</div>
+            <div class="task-detail">Entrepreneur existant. Douleurs profondes, déclencheurs d'achat, objections, mots exacts qu'il utilise.</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Fiche persona — Niche 2 : Hamza</div>
+            <div class="task-detail">Cherche à se libérer ou à proposer des prestations IA. Douleurs, déclencheurs, objections. Qu'est-ce qu'il veut : liberté ? revenus ? statut ?</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Fiche persona — Niche 3 : Soraya</div>
+            <div class="task-detail">A une idée bloquée faute de compétences/budget. Douleurs, déclencheurs, objections. Qu'est-ce qui l'a empêchée jusqu'ici ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Tâche 3 — Offre irrésistible</div>
+      <div class="tasks-list">
+        <div class="task-item">
+          <div class="task-check" onclick="this.classList.toggle('done')"></div>
+          <div class="task-content">
+            <div class="task-label">Construire l'offre unique qui parle aux 3 niches</div>
+            <div class="task-detail">Promesse centrale, résultats concrets par niche, compétences transmises, modules clés, bonus, garantie. Un seul produit, trois chemins vers le résultat.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DELIVERABLES -->
+  <div class="deliverable-card">
+    <div class="block-title">📦 Livrables à apporter — Sam. 31 mai · 10h (Hicham ET Ouabi)</div>
+    <div class="deliverable-grid">
+      <div class="d-item">
+        <div class="d-num">Livrable 01</div>
+        <div class="d-value">Listing structuré des offres concurrentes IA + angles non occupés</div>
+      </div>
+      <div class="d-item">
+        <div class="d-num">Livrable 02</div>
+        <div class="d-value">3 fiches personas complètes : Yassine, Hamza (v2), Soraya</div>
+      </div>
+      <div class="d-item">
+        <div class="d-num">Livrable 03</div>
+        <div class="d-value">Première version de l'offre irrésistible — 3 niches, 1 produit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WARNING -->
+  <div class="warning-card">
+    <div class="warning-icon">⚠️</div>
+    <p><strong>Garde-fou</strong> — Chacun travaille en autonomie sur les mêmes tâches. On croise les analyses le samedi 31 mai à 10h. Budget temps max : 5–7h chacun.</p>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">Fiche de travail v3 · Hicham & Ouabi · Semaine du 26 mai 2026 · Confidentiel</div>
+
+</div>
+</body>
+</html>
