@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VoiceCore — Agent IA Inbound · Chaque appel mérite une réponse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=inter:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════ */
+:root{
+  --void:#020817; --deep:#050d2a; --navy:#0a1535;
+  --card:rgba(10,21,53,.65); --surface:rgba(30,58,138,.1);
+  --b900:#1e3a8a; --b700:#1d4ed8; --b500:#3b82f6;
+  --b400:#60a5fa; --b300:#93c5fd;
+  --c500:#06b6d4; --c400:#22d3ee; --c300:#67e8f9;
+  --txt:#eef4ff; --txt2:rgba(186,210,255,.75); --txt3:rgba(148,170,210,.5);
+  --bdr:rgba(59,130,246,.18); --bdr2:rgba(96,165,250,.45);
+  --glow-sm:0 0 20px rgba(59,130,246,.25);
+  --glow-md:0 0 40px rgba(59,130,246,.35);
+  --glow-lg:0 0 80px rgba(37,99,235,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--void); color:var(--txt);
+  font-family:'DM Sans',system-ui,sans-serif;
+  font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4{font-family:-apple-system,'SF Pro Display',sans-serif;font-weight:800;line-height:1.05;}
+a{text-decoration:none;color:inherit;}
+
+/* ═══════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════ */
+.grad{
+  background:linear-gradient(130deg,var(--b400) 0%,var(--c400) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.grad-red{
+  background:linear-gradient(130deg,#f87171,#fb923c);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.grid-bg{
+  background-image:
+    linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 18px;border-radius:100px;
+  background:rgba(29,78,216,.15);
+  border:1px solid rgba(96,165,250,.3);
+  font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--b300);
+}
+.dot-live{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--c400);box-shadow:0 0 8px var(--c400);
+  animation:pulse 2s ease-in-out infinite;
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:16px 36px;border-radius:100px;font-size:16px;font-weight:700;
+  background:linear-gradient(135deg,var(--b700),#0284c7);
+  color:#fff;letter-spacing:.01em;border:none;cursor:pointer;
+  box-shadow:0 0 40px rgba(29,78,216,.6),inset 0 1px 0 rgba(255,255,255,.1);
+  transition:transform .2s,box-shadow .2s;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 60px rgba(29,78,216,.8),inset 0 1px 0 rgba(255,255,255,.1);}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:16px 36px;border-radius:100px;font-size:15px;font-weight:600;
+  background:rgba(29,78,216,.1);border:1px solid rgba(96,165,250,.35);
+  color:var(--b300);cursor:pointer;transition:background .2s,border-color .2s;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-ghost:hover{background:rgba(29,78,216,.2);border-color:rgba(96,165,250,.6);}
+.section-label{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--b400);}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .75s ease,transform .75s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-18px);}}
+@keyframes floatB{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+@keyframes waveBar{0%,100%{transform:scaleY(.3);}50%{transform:scaleY(1);}}
+@keyframes marqueeL{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+@keyframes marqueeR{0%{transform:translateX(-50%);}100%{transform:translateX(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes ring{0%{transform:scale(1);opacity:.6;}70%{transform:scale(2.8);opacity:0;}100%{transform:scale(1);opacity:0;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+@keyframes countUp{from{opacity:0;}to{opacity:1;}}
+
+/* ═══════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:20px 0;transition:padding .3s,background .3s,backdrop-filter .3s;
+  animation:fadeUp .7s ease both;
+}
+nav.scrolled{
+  padding:12px 0;
+  background:rgba(2,8,23,.88);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(59,130,246,.12);
+}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--b700),var(--c500));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 20px rgba(37,99,235,.5);font-size:18px;
+}
+.logo-text{font-family:'inter',sans-serif;font-weight:800;font-size:19px;}
+.logo-text span{color:var(--c400);}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{font-size:14px;font-weight:500;color:var(--txt2);transition:color .2s;}
+.nav-links a:hover{color:var(--b300);}
+.nav-cta{display:flex;align-items:center;gap:12px;}
+.nav-cta a{font-size:14px;color:var(--txt2);font-weight:500;padding:8px 14px;}
+.nav-demo{
+  padding:10px 22px;border-radius:100px;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,var(--b700),#0284c7);
+  color:#fff;box-shadow:0 0 24px rgba(29,78,216,.5);
+  transition:transform .2s,box-shadow .2s;
+}
+.nav-demo:hover{transform:scale(1.04);box-shadow:0 0 40px rgba(29,78,216,.7);}
+@media(max-width:860px){.nav-links{display:none;}}
+@media(max-width:640px){.nav-cta .hide-sm{display:none;}}
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+#hero{
+  position:relative;min-height:100vh;display:flex;
+  align-items:center;justify-content:center;
+  padding:130px 24px 80px;overflow:hidden;
+}
+.hero-bg{position:absolute;inset:0;pointer-events:none;}
+.hero-radial{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 85% 65% at 50% 0%,rgba(29,78,216,.28) 0%,transparent 70%);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.orb{
+  position:absolute;border-radius:50%;filter:blur(50px);pointer-events:none;
+}
+.orb-1{top:12%;left:5%;width:320px;height:320px;background:radial-gradient(circle,rgba(29,78,216,.18) 0%,transparent 70%);animation:float 7s ease-in-out infinite;}
+.orb-2{top:28%;right:4%;width:260px;height:260px;background:radial-gradient(circle,rgba(6,182,212,.14) 0%,transparent 70%);animation:floatB 9s ease-in-out infinite 2s;}
+.orb-3{bottom:15%;left:20%;width:200px;height:200px;background:radial-gradient(circle,rgba(29,78,216,.1) 0%,transparent 70%);animation:float 11s ease-in-out infinite 1s;}
+.hero-content{position:relative;z-index:10;max-width:920px;margin:0 auto;text-align:center;}
+.hero-badge{animation:fadeUp .6s .2s ease both;}
+.hero-h1{font-size:clamp(42px,7.5vw,82px);letter-spacing:-.04em;margin:28px 0 20px;animation:fadeUp .8s .4s ease both;opacity:0;animation-fill-mode:both;}
+.hero-sub{font-size:clamp(16px,2.2vw,20px);color:var(--txt2);max-width:620px;margin:0 auto 40px;line-height:1.7;animation:fadeUp .7s .6s ease both;opacity:0;animation-fill-mode:both;}
+.hero-ctas{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:64px;animation:fadeUp .7s .8s ease both;opacity:0;animation-fill-mode:both;}
+
+/* Wave widget */
+.wave-widget{
+  background:rgba(10,21,53,.65);
+  border:1px solid rgba(59,130,246,.22);
+  border-radius:24px;padding:32px 36px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 0 60px rgba(29,78,216,.14),inset 0 1px 0 rgba(255,255,255,.04);
+  max-width:680px;margin:0 auto;
+  animation:fadeUp .8s 1s ease both;opacity:0;animation-fill-mode:both;
+}
+.widget-header{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+.widget-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(29,78,216,.5),rgba(6,182,212,.3));
+  border:1px solid rgba(96,165,250,.3);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.widget-status{font-size:12px;color:var(--txt2);display:flex;align-items:center;gap:6px;margin-top:3px;}
+.live-tag{
+  margin-left:auto;padding:4px 12px;border-radius:100px;
+  font-size:11px;font-weight:700;
+  background:rgba(6,182,212,.15);color:var(--c400);border:1px solid rgba(6,182,212,.3);
+}
+.waveform{display:flex;align-items:center;justify-content:center;gap:4px;height:64px;}
+.wbar{
+  width:4px;border-radius:3px;
+  background:linear-gradient(to top,var(--b700),var(--b400));
+  transform-origin:bottom;
+  animation:waveBar 1s ease-in-out infinite;
+}
+.transcript{
+  margin-top:24px;padding:16px 20px;
+  background:rgba(29,78,216,.08);
+  border-radius:12px;border:1px solid rgba(59,130,246,.12);
+  text-align:left;
+}
+.tr-label{font-size:12px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:8px;}
+.tr-text{font-size:14px;color:var(--txt2);line-height:1.7;}
+.tr-client{color:var(--b400);font-weight:700;}
+.tr-agent{color:var(--c400);font-weight:700;}
+.widget-footer{display:flex;gap:24px;margin-top:24px;justify-content:center;flex-wrap:wrap;}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt3);font-weight:500;}
+.trust-icon{color:var(--b400);}
+
+/* ═══════════════════════════════════════
+   STATS
+═══════════════════════════════════════ */
+#stats{
+  padding:72px 24px;
+  background:linear-gradient(180deg,var(--void) 0%,var(--deep) 50%,var(--void) 100%);
+  border-top:1px solid rgba(59,130,246,.1);
+  border-bottom:1px solid rgba(59,130,246,.1);
+  position:relative;overflow:hidden;
+}
+.stats-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);}
+@media(max-width:700px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-item{padding:40px 24px;text-align:center;border-right:1px solid rgba(59,130,246,.12);}
+.stat-item:last-child{border-right:none;}
+.stat-val{
+  font-family:'inter',sans-serif;font-size:clamp(44px,5.5vw,64px);
+  font-weight:800;letter-spacing:-.05em;line-height:1;margin-bottom:8px;
+  background:linear-gradient(130deg,var(--b400),var(--c400));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.stat-lbl{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:4px;}
+.stat-sub{font-size:12px;color:var(--txt3);}
+
+/* ═══════════════════════════════════════
+   PROBLEM
+═══════════════════════════════════════ */
+#problem{padding:clamp(80px,10vw,120px) 24px;position:relative;overflow:hidden;}
+.prob-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:72px;}
+.pain-card{
+  padding:30px 28px;
+  background:rgba(10,21,53,.55);
+  border:1px solid rgba(248,113,113,.15);
+  border-radius:20px;backdrop-filter:blur(10px);
+  transition:transform .3s,border-color .3s;
+}
+.pain-card:hover{transform:translateY(-5px);border-color:rgba(248,113,113,.35);}
+.pain-icon{
+  width:48px;height:48px;border-radius:14px;margin-bottom:18px;
+  background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.pain-title{font-size:17px;font-weight:700;margin-bottom:10px;line-height:1.3;}
+.pain-desc{font-size:14px;color:var(--txt2);line-height:1.7;}
+.solution-box{
+  background:linear-gradient(135deg,rgba(29,78,216,.15),rgba(6,182,212,.08));
+  border:1px solid rgba(59,130,246,.25);border-radius:24px;
+  padding:clamp(32px,5vw,52px);
+  display:flex;align-items:center;gap:40px;flex-wrap:wrap;
+}
+.sol-left{flex:1 1 280px;}
+.sol-mini{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c400);margin-bottom:14px;}
+.sol-right{flex:1 1 280px;display:flex;flex-direction:column;gap:12px;}
+.sol-item{display:flex;align-items:flex-start;gap:10px;}
+.sol-check{color:var(--c400);font-size:16px;flex-shrink:0;margin-top:2px;}
+.sol-text{font-size:15px;color:var(--txt2);line-height:1.5;}
+
+/* ═══════════════════════════════════════
+   FEATURES
+═══════════════════════════════════════ */
+#features{padding:clamp(80px,10vw,120px) 24px;position:relative;overflow:hidden;}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;}
+.feat-card{
+  padding:32px;background:rgba(10,21,53,.65);
+  border-radius:20px;backdrop-filter:blur(12px);
+  transition:transform .3s,box-shadow .3s;
+  border:1px solid rgba(59,130,246,.15);
+}
+.feat-card:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(29,78,216,.2);}
+.feat-icon-box{
+  width:52px;height:52px;border-radius:16px;margin-bottom:22px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+}
+.feat-title{font-size:18px;font-weight:700;margin-bottom:12px;}
+.feat-desc{font-size:14px;color:var(--txt2);line-height:1.72;}
+
+/* ═══════════════════════════════════════
+   HOW IT WORKS
+═══════════════════════════════════════ */
+#how{padding:clamp(80px,10vw,120px) 24px;position:relative;}
+.steps{display:flex;flex-direction:column;gap:28px;position:relative;max-width:860px;margin:0 auto;}
+.step-line{
+  position:absolute;left:48px;top:64px;bottom:64px;
+  width:2px;
+  background:linear-gradient(180deg,var(--b700),var(--c500),var(--b700));
+  opacity:.28;
+}
+.step-card{
+  display:flex;gap:32px;align-items:flex-start;
+  padding:36px 36px;background:rgba(10,21,53,.55);
+  border:1px solid rgba(59,130,246,.15);border-radius:24px;
+  backdrop-filter:blur(10px);
+  transition:border-color .3s,transform .3s;
+  position:relative;z-index:1;
+}
+.step-card:hover{border-color:rgba(59,130,246,.4);transform:translateX(4px);}
+.step-num-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
+.step-circle{
+  width:64px;height:64px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(29,78,216,.4),rgba(6,182,212,.2));
+  border:1px solid rgba(59,130,246,.4);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  box-shadow:0 0 28px rgba(29,78,216,.3);
+}
+.step-n{font-family:'inter',sans-serif;font-size:11px;font-weight:800;color:rgba(96,165,250,.4);letter-spacing:.1em;}
+.step-body{flex:1;}
+.step-title{font-size:21px;font-weight:700;margin-bottom:10px;letter-spacing:-.01em;}
+.step-desc{font-size:15px;color:var(--txt2);line-height:1.72;margin-bottom:18px;}
+.step-details{display:flex;flex-direction:column;gap:8px;}
+.step-detail{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt2);}
+.dot-blue{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--b500),var(--c400));flex-shrink:0;}
+
+/* ═══════════════════════════════════════
+   MARQUEE
+═══════════════════════════════════════ */
+#usecases{padding:clamp(80px,10vw,120px) 0;overflow:hidden;position:relative;}
+.marquee-title{max-width:1100px;margin:0 auto 52px;padding:0 24px;text-align:center;}
+.marquee-wrap{position:relative;}
+.marquee-fade-l{position:absolute;top:0;left:0;bottom:0;width:180px;background:linear-gradient(90deg,var(--void),transparent);z-index:10;pointer-events:none;}
+.marquee-fade-r{position:absolute;top:0;right:0;bottom:0;width:180px;background:linear-gradient(270deg,var(--void),transparent);z-index:10;pointer-events:none;}
+.marquee-rows{display:flex;flex-direction:column;gap:18px;}
+.marquee-track{display:flex;gap:18px;width:max-content;}
+.marquee-track.left{animation:marqueeL 35s linear infinite;}
+.marquee-track.right{animation:marqueeR 28s linear infinite;}
+.marquee-track:hover{animation-play-state:paused;}
+.uc-card{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 24px;flex-shrink:0;
+  background:rgba(10,21,53,.7);border:1px solid rgba(59,130,246,.18);
+  border-radius:14px;backdrop-filter:blur(10px);white-space:nowrap;
+}
+.uc-emoji{font-size:26px;}
+.uc-sector{font-size:14px;font-weight:700;font-family:'inter',sans-serif;color:var(--txt);}
+.uc-usage{font-size:12px;color:rgba(96,165,250,.7);margin-top:2px;}
+
+/* ═══════════════════════════════════════
+   TESTIMONIALS
+═══════════════════════════════════════ */
+#testimonials{padding:clamp(80px,10vw,120px) 24px;position:relative;overflow:hidden;}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin-bottom:52px;}
+.testi-card{
+  padding:34px 30px;background:rgba(10,21,53,.65);
+  border-radius:24px;backdrop-filter:blur(12px);
+  display:flex;flex-direction:column;
+  transition:transform .3s;
+}
+.testi-card:hover{transform:translateY(-5px);}
+.testi-stars{color:#fbbf24;font-size:15px;margin-bottom:18px;letter-spacing:2px;}
+.testi-quote-icon{font-size:28px;margin-bottom:12px;opacity:.6;}
+.testi-text{font-size:15px;color:var(--txt2);line-height:1.78;flex:1;margin-bottom:26px;font-style:italic;}
+.testi-author{display:flex;align-items:center;gap:14px;}
+.testi-avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;font-family:'inter',sans-serif;
+  flex-shrink:0;
+}
+.testi-name{font-size:15px;font-weight:700;}
+.testi-role{font-size:12px;color:var(--txt3);margin-top:2px;}
+.proof-bar{
+  padding:24px 40px;background:rgba(29,78,216,.08);
+  border:1px solid rgba(59,130,246,.2);border-radius:16px;
+  display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;
+}
+.proof-stat{text-align:center;}
+.proof-val{font-size:22px;font-weight:800;font-family:'inter',sans-serif;color:var(--b400);letter-spacing:-.02em;}
+.proof-lbl{font-size:12px;color:var(--txt3);margin-top:2px;font-weight:500;}
+
+/* ═══════════════════════════════════════
+   PRICING
+═══════════════════════════════════════ */
+#pricing{padding:clamp(80px,10vw,120px) 24px;position:relative;overflow:hidden;}
+.pricing-toggle{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:52px;}
+.toggle-btn{
+  position:relative;width:52px;height:28px;border-radius:100px;
+  border:1px solid rgba(59,130,246,.3);cursor:pointer;
+  transition:background .3s;background:rgba(29,78,216,.2);
+}
+.toggle-btn.on{background:linear-gradient(135deg,var(--b700),#0284c7);}
+.toggle-knob{
+  position:absolute;top:4px;left:4px;
+  width:20px;height:20px;border-radius:50%;background:#fff;
+  transition:transform .3s;box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.toggle-btn.on .toggle-knob{transform:translateX(24px);}
+.toggle-lbl{font-size:14px;font-weight:500;color:rgba(186,210,255,.4);}
+.toggle-lbl.active{color:var(--txt);}
+.save-tag{font-size:12px;font-weight:700;color:var(--c400);}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;}
+.plan-card{
+  padding:36px 30px;background:rgba(10,21,53,.65);
+  border:1px solid rgba(59,130,246,.15);border-radius:24px;
+  backdrop-filter:blur(12px);display:flex;flex-direction:column;
+  transition:transform .3s;position:relative;
+}
+.plan-card:hover{transform:translateY(-6px);}
+.plan-card.featured{
+  background:linear-gradient(135deg,rgba(29,78,216,.22),rgba(6,182,212,.08));
+  border-color:rgba(59,130,246,.5);
+  box-shadow:0 0 60px rgba(29,78,216,.2);
+}
+.plan-badge{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  padding:6px 18px;border-radius:100px;white-space:nowrap;
+  background:linear-gradient(135deg,var(--b700),var(--c500));
+  font-size:12px;font-weight:700;color:#fff;
+  box-shadow:0 0 20px rgba(29,78,216,.5);
+}
+.plan-name{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.plan-desc{font-size:14px;color:var(--txt2);line-height:1.55;}
+.plan-price{margin:26px 0;}
+.plan-price-val{font-size:52px;font-weight:800;font-family:'inter',sans-serif;letter-spacing:-.04em;color:var(--txt);}
+.plan-period{font-size:14px;color:var(--txt3);}
+.plan-annual{font-size:12px;color:var(--c400);margin-top:4px;}
+.plan-devis{font-size:36px;font-weight:800;font-family:'inter',sans-serif;color:var(--txt);}
+.plan-feats{display:flex;flex-direction:column;gap:11px;flex:1;margin-bottom:28px;}
+.plan-feat{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt2);}
+.check{font-size:15px;}
+.plan-btn{
+  display:block;padding:14px;text-align:center;border-radius:100px;
+  font-weight:700;font-size:15px;font-family:'DM Sans',sans-serif;
+  transition:opacity .2s,transform .2s;border:none;cursor:pointer;
+}
+.plan-btn:hover{opacity:.85;transform:scale(1.02);}
+.plan-btn.primary{background:linear-gradient(135deg,var(--b700),#0284c7);color:#fff;box-shadow:0 0 30px rgba(29,78,216,.4);}
+.plan-guarantee{text-align:center;margin-top:36px;font-size:14px;color:var(--txt3);}
+
+/* ═══════════════════════════════════════
+   FAQ
+═══════════════════════════════════════ */
+#faq{padding:clamp(80px,10vw,120px) 24px;}
+.faq-inner{max-width:760px;margin:0 auto;}
+.faq-list{display:flex;flex-direction:column;gap:12px;}
+.faq-item{
+  background:rgba(10,21,53,.65);
+  border:1px solid rgba(59,130,246,.15);border-radius:16px;
+  overflow:hidden;backdrop-filter:blur(10px);
+  transition:border-color .3s;
+}
+.faq-item.open{border-color:rgba(59,130,246,.4);}
+.faq-q{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  padding:22px 24px;background:none;border:none;cursor:pointer;
+  text-align:left;gap:16px;font-family:'DM Sans',sans-serif;
+}
+.faq-q-text{font-size:16px;font-weight:600;color:var(--txt);line-height:1.4;transition:color .2s;}
+.faq-item.open .faq-q-text{color:var(--b400);}
+.faq-icon{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--b400);font-size:20px;transition:background .2s,transform .3s;
+  font-weight:300;line-height:1;
+}
+.faq-item.open .faq-icon{background:rgba(59,130,246,.2);transform:rotate(45deg);}
+.faq-a{
+  max-height:0;overflow:hidden;
+  transition:max-height .4s ease,opacity .3s ease;
+  opacity:0;
+}
+.faq-item.open .faq-a{max-height:400px;opacity:1;}
+.faq-a-text{padding:0 24px 24px;font-size:15px;color:var(--txt2);line-height:1.78;}
+.faq-contact{
+  margin-top:44px;padding:30px;text-align:center;
+  background:rgba(29,78,216,.08);border:1px solid rgba(59,130,246,.2);border-radius:20px;
+}
+.faq-contact p{font-size:16px;color:var(--txt2);margin-bottom:16px;}
+.faq-contact a{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 28px;border-radius:100px;
+  border:1px solid rgba(96,165,250,.4);background:rgba(29,78,216,.12);
+  color:var(--b400);font-weight:600;font-size:15px;transition:background .2s;
+}
+.faq-contact a:hover{background:rgba(29,78,216,.22);}
+
+/* ═══════════════════════════════════════
+   CTA FINAL
+═══════════════════════════════════════ */
+#cta{padding:clamp(80px,10vw,120px) 24px;position:relative;overflow:hidden;text-align:center;}
+.cta-radial{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 100% 80% at 50% 50%,rgba(29,78,216,.22) 0%,transparent 70%);
+  pointer-events:none;
+}
+.cta-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(59,130,246,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.05) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;
+}
+.cta-top-line{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:60%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(59,130,246,.6),rgba(34,211,238,.6),transparent);
+}
+.cta-inner{position:relative;z-index:1;max-width:800px;margin:0 auto;}
+.cta-h2{font-size:clamp(36px,5.5vw,66px);letter-spacing:-.04em;margin:28px 0 18px;}
+.cta-sub{font-size:19px;color:var(--txt2);max-width:540px;margin:0 auto 48px;line-height:1.65;}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:44px;}
+.cta-trust{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;}
+.cta-trust span{font-size:14px;color:var(--txt3);font-weight:500;}
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+footer{
+  padding:80px 24px 36px;
+  border-top:1px solid rgba(59,130,246,.12);
+  background:linear-gradient(180deg,var(--void),#010610);
+}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:48px;margin-bottom:56px;}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.footer-grid{grid-template-columns:1fr;}}
+.footer-brand p{font-size:14px;color:var(--txt3);line-height:1.72;max-width:230px;margin:14px 0 20px;}
+.social-links{display:flex;gap:10px;}
+.social-btn{
+  width:36px;height:36px;border-radius:8px;
+  background:rgba(29,78,216,.12);border:1px solid rgba(59,130,246,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--txt2);
+  transition:background .2s,color .2s;
+}
+.social-btn:hover{background:rgba(29,78,216,.25);color:var(--b400);}
+.footer-col-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--b400);margin-bottom:16px;}
+.footer-col{display:flex;flex-direction:column;gap:10px;}
+.footer-col a{font-size:14px;color:var(--txt3);transition:color .2s;}
+.footer-col a:hover{color:var(--b300);}
+.footer-bottom{
+  padding-top:28px;border-top:1px solid rgba(59,130,246,.1);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+}
+.footer-copy{font-size:13px;color:rgba(148,170,210,.4);}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap;}
+.fbadge{
+  padding:4px 12px;border-radius:100px;font-size:12px;font-weight:500;
+  background:rgba(29,78,216,.1);border:1px solid rgba(59,130,246,.15);color:var(--txt3);
+}
+
+/* ═══════════════════════════════════════
+   SHARED SECTION STYLES
+═══════════════════════════════════════ */
+.section-center{text-align:center;margin-bottom:56px;}
+.section-h2{font-size:clamp(30px,4.5vw,52px);letter-spacing:-.03em;margin:12px 0 16px;}
+.section-p{font-size:18px;color:var(--txt2);max-width:520px;margin:0 auto;line-height:1.65;}
+.max-w{max-width:1100px;margin:0 auto;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--void);}
+::-webkit-scrollbar-thumb{background:var(--b700);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">🎙️</div>
+      <span class="logo-text">Voice<span>Core</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Fonctionnalités</a>
+      <a href="#how">Comment ça marche</a>
+      <a href="#usecases">Cas d'usage</a>
+      <a href="#pricing">Tarifs</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#pricing" class="hide-sm">Voir les tarifs</a>
+      <a href="#cta" class="nav-demo">Réserver une démo →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     HERO
+═══════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="hero-radial"></div>
+    <div class="hero-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="badge">
+        <span class="dot-live"></span>
+        Agent IA · 100% Inbound · Réponse &lt; 1s
+      </div>
+    </div>
+    <h1 class="hero-h1">
+      Votre réceptionniste IA<br>
+      <span class="grad">répond à chaque appel.</span>
+    </h1>
+    <p class="hero-sub">Transformez chaque appel entrant en expérience premium. Notre agent vocal IA qualifie, informe et convertit automatiquement — sans jamais mettre un client en attente.</p>
+    <div class="hero-ctas">
+      <a href="#cta" class="btn-primary">📞 Réserver une démo gratuite</a>
+      <a href="#how" class="btn-ghost">Voir comment ça marche</a>
+    </div>
+
+    <!-- Wave widget -->
+    <div class="wave-widget">
+      <div class="widget-header">
+        <div class="widget-icon">📞</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--txt)">Agent VoiceCore · En ligne</div>
+          <div class="widget-status">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--c400);display:inline-block;box-shadow:0 0 6px var(--c400);"></span>
+            Appel entrant en cours · 00:42
+          </div>
+        </div>
+        <div class="live-tag">LIVE</div>
+      </div>
+      <div class="waveform" id="waveform"></div>
+      <div class="transcript">
+        <div class="tr-label">Transcription en direct</div>
+        <div class="tr-text">
+          <span class="tr-client">Client :</span> "Bonjour, je voudrais prendre rendez-vous pour lundi matin..."<br>
+          <span class="tr-agent">Agent IA :</span> "Bien sûr ! J'ai un créneau à 9h ou à 14h lundi. Quelle heure vous convient le mieux ?"
+        </div>
+      </div>
+      <div class="widget-footer">
+        <div class="trust-item"><span class="trust-icon">⚡</span> Réponse instantanée</div>
+        <div class="trust-item"><span class="trust-icon">🔒</span> RGPD Compliant</div>
+        <div class="trust-item"><span class="trust-icon">🇫🇷</span> Français natif</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     STATS
+═══════════════════════════════════════ -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item reveal">
+      <div class="stat-val" data-target="99" data-suffix="%">0%</div>
+      <div class="stat-lbl">Taux de réponse</div>
+      <div class="stat-sub">Zéro appel manqué</div>
+    </div>
+    <div class="stat-item reveal">
+      <div class="stat-val" data-target="0.8" data-suffix="s" data-decimals="1">0s</div>
+      <div class="stat-lbl">Temps de décrochage</div>
+      <div class="stat-sub">Réponse instantanée</div>
+    </div>
+    <div class="stat-item reveal">
+      <div class="stat-val" data-target="24" data-suffix="h/24">0h/24</div>
+      <div class="stat-lbl">Disponibilité</div>
+      <div class="stat-sub">7 jours sur 7</div>
+    </div>
+    <div class="stat-item reveal">
+      <div class="stat-val" data-target="3" data-suffix="x">0x</div>
+      <div class="stat-lbl">Plus d'efficacité</div>
+      <div class="stat-sub">vs réception humaine</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     PROBLEM
+═══════════════════════════════════════ -->
+<section id="problem">
+  <div class="max-w">
+    <div class="section-center reveal">
+      <div class="section-label">Le problème</div>
+      <h2 class="section-h2">Combien d'appels perdez-vous <span class="grad-red">chaque semaine ?</span></h2>
+      <p class="section-p">La gestion manuelle des appels entrants est coûteuse, imprévisible et frustrante — pour vous comme pour vos clients.</p>
+    </div>
+    <div class="prob-grid">
+      <div class="pain-card reveal">
+        <div class="pain-icon">📵</div>
+        <div class="pain-title">Des appels qui tombent dans le vide</div>
+        <div class="pain-desc">Chaque appel sans réponse est un client perdu. 85% des personnes qui n'arrivent pas à joindre une entreprise ne rappellent jamais.</div>
+      </div>
+      <div class="pain-card reveal" style="transition-delay:.1s">
+        <div class="pain-icon">⏳</div>
+        <div class="pain-title">Des temps d'attente insupportables</div>
+        <div class="pain-desc">Plus de 2 minutes d'attente et 60% de vos appelants raccrochent. La frustration devient votre image de marque.</div>
+      </div>
+      <div class="pain-card reveal" style="transition-delay:.2s">
+        <div class="pain-icon">😰</div>
+        <div class="pain-title">Une équipe surchargée</div>
+        <div class="pain-desc">Vos collaborateurs passent 40% de leur temps à répondre aux mêmes questions. Un coût humain et financier considérable.</div>
+      </div>
+      <div class="pain-card reveal" style="transition-delay:.3s">
+        <div class="pain-icon">💸</div>
+        <div class="pain-title">Des opportunités commerciales perdues</div>
+        <div class="pain-desc">La nuit, les weekends, les jours fériés — votre téléphone sonne dans le vide pendant que vos concurrents répondent.</div>
+      </div>
+    </div>
+    <div class="solution-box reveal">
+      <div class="sol-left">
+        <div class="sol-mini">La solution VoiceCore</div>
+        <h3 style="font-size:clamp(24px,3vw,38px);letter-spacing:-.02em;">Et si chaque appel devenait<br><span class="grad">une opportunité ?</span></h3>
+      </div>
+      <div class="sol-right">
+        <div class="sol-item"><span class="sol-check">✓</span><span class="sol-text">Chaque appel reçoit une réponse professionnelle en moins d'une seconde</span></div>
+        <div class="sol-item"><span class="sol-check">✓</span><span class="sol-text">Zéro temps d'attente, même aux heures de pointe</span></div>
+        <div class="sol-item"><span class="sol-check">✓</span><span class="sol-text">Votre équipe se concentre sur ce qui crée vraiment de la valeur</span></div>
+        <div class="sol-item"><span class="sol-check">✓</span><span class="sol-text">Disponible 24h/24, 7j/7, même les jours fériés</span></div>
+      </div>
+      <a href="#features" class="btn-primary" style="flex-shrink:0;">Voir les fonctionnalités →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     FEATURES
+═══════════════════════════════════════ -->
+<section id="features" style="padding:clamp(80px,10vw,120px) 24px;position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;"></div>
+  <div class="max-w" style="position:relative;z-index:1;">
+    <div class="section-center reveal">
+      <div class="section-label">Fonctionnalités</div>
+      <h2 class="section-h2">Un agent vocal qui<br><span class="grad">pense comme un humain</span></h2>
+      <p class="section-p">Toutes les fonctionnalités pour offrir une expérience téléphonique exceptionnelle, sans effort de votre côté.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal" style="border-color:rgba(59,130,246,.18);">
+        <div class="feat-icon-box" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);box-shadow:0 0 18px rgba(59,130,246,.2);">🧠</div>
+        <div class="feat-title">Compréhension naturelle</div>
+        <div class="feat-desc">Notre IA comprend les nuances, les accents, les interruptions et s'adapte en temps réel au contexte de la conversation.</div>
+      </div>
+      <div class="feat-card reveal" style="border-color:rgba(6,182,212,.18);transition-delay:.08s">
+        <div class="feat-icon-box" style="background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);box-shadow:0 0 18px rgba(6,182,212,.2);">📅</div>
+        <div class="feat-title">Prise de rendez-vous autonome</div>
+        <div class="feat-desc">Synchronisation directe avec votre agenda. L'agent prend, modifie et confirme des rendez-vous sans intervention humaine.</div>
+      </div>
+      <div class="feat-card reveal" style="border-color:rgba(129,140,248,.18);transition-delay:.16s">
+        <div class="feat-icon-box" style="background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);box-shadow:0 0 18px rgba(129,140,248,.2);">🌍</div>
+        <div class="feat-title">Multi-langues</div>
+        <div class="feat-desc">Français, Anglais, Espagnol, Arabe et plus. L'agent détecte automatiquement la langue et répond de façon native.</div>
+      </div>
+      <div class="feat-card reveal" style="border-color:rgba(34,211,238,.18);transition-delay:.24s">
+        <div class="feat-icon-box" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);box-shadow:0 0 18px rgba(34,211,238,.2);">📊</div>
+        <div class="feat-title">Analytics & rapports</div>
+        <div class="feat-desc">Dashboard complet : volumes d'appels, durées, intentions détectées, taux de résolution et satisfaction client en temps réel.</div>
+      </div>
+      <div class="feat-card reveal" style="border-color:rgba(52,211,153,.18);transition-delay:.32s">
+        <div class="feat-icon-box" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);box-shadow:0 0 18px rgba(52,211,153,.2);">🔄</div>
+        <div class="feat-title">Escalade intelligente</div>
+        <div class="feat-desc">Si l'appel dépasse les capacités de l'IA, le transfert vers le bon collaborateur se fait de façon fluide, avec contexte complet.</div>
+      </div>
+      <div class="feat-card reveal" style="border-color:rgba(251,146,60,.18);transition-delay:.4s">
+        <div class="feat-icon-box" style="background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.3);box-shadow:0 0 18px rgba(251,146,60,.2);">🔒</div>
+        <div class="feat-title">Sécurité RGPD</div>
+        <div class="feat-desc">Hébergement européen, chiffrement de bout en bout, aucune donnée revendue. Conformité totale avec la réglementation française.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     HOW IT WORKS
+═══════════════════════════════════════ -->
+<section id="how" style="padding:clamp(80px,10vw,120px) 24px;">
+  <div class="max-w">
+    <div class="section-center reveal">
+      <div class="section-label">Comment ça fonctionne</div>
+      <h2 class="section-h2">Opérationnel en <span class="grad">48 heures</span></h2>
+      <p class="section-p">De la configuration au premier appel géré, nous nous occupons de tout.</p>
+    </div>
+    <div class="steps">
+      <div class="step-line"></div>
+      <div class="step-card reveal">
+        <div class="step-num-wrap">
+          <div class="step-circle">⚙️</div>
+          <span class="step-n">01</span>
+        </div>
+        <div class="step-body">
+          <div class="step-title">On configure votre agent</div>
+          <div class="step-desc">En 48h, nous paramétrons votre agent IA avec vos scripts, votre FAQ, vos plages horaires et vos règles métier. Votre agent devient un expert de votre business.</div>
+          <div class="step-details">
+            <div class="step-detail"><span class="dot-blue"></span>Intégration de votre base de connaissances</div>
+            <div class="step-detail"><span class="dot-blue"></span>Configuration des scénarios de conversation</div>
+            <div class="step-detail"><span class="dot-blue"></span>Test & validation en conditions réelles</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-card reveal" style="transition-delay:.12s">
+        <div class="step-num-wrap">
+          <div class="step-circle">🚀</div>
+          <span class="step-n">02</span>
+        </div>
+        <div class="step-body">
+          <div class="step-title">L'agent prend vos appels</div>
+          <div class="step-desc">Décrochage immédiat, ton professionnel, réponses précises. Votre agent gère chaque appel entrant comme un expert — qualification, information, prise de RDV.</div>
+          <div class="step-details">
+            <div class="step-detail"><span class="dot-blue"></span>Réponse en moins d'une seconde</div>
+            <div class="step-detail"><span class="dot-blue"></span>Gestion des demandes courantes sans transfert</div>
+            <div class="step-detail"><span class="dot-blue"></span>Escalade automatique si nécessaire</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-card reveal" style="transition-delay:.24s">
+        <div class="step-num-wrap">
+          <div class="step-circle">📈</div>
+          <span class="step-n">03</span>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Vous pilotez & optimisez</div>
+          <div class="step-desc">Accédez à votre dashboard en temps réel : volumes, intentions détectées, satisfaction client. Affinez continuellement les performances de votre agent.</div>
+          <div class="step-details">
+            <div class="step-detail"><span class="dot-blue"></span>Dashboard analytics temps réel</div>
+            <div class="step-detail"><span class="dot-blue"></span>Rapports hebdomadaires automatiques</div>
+            <div class="step-detail"><span class="dot-blue"></span>Optimisation continue basée sur les données</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     USE CASE MARQUEE
+═══════════════════════════════════════ -->
+<section id="usecases">
+  <div class="marquee-title reveal">
+    <div class="section-label">Secteurs d'activité</div>
+    <h2 class="section-h2" style="margin-top:12px;">Votre secteur, notre expertise</h2>
+    <p class="section-p" style="margin-top:12px;">VoiceCore s'adapte à chaque métier. Configuré spécifiquement pour votre activité.</p>
+  </div>
+  <div class="marquee-wrap">
+    <div class="marquee-fade-l"></div>
+    <div class="marquee-fade-r"></div>
+    <div class="marquee-rows">
+      <div class="marquee-track left" id="track1"></div>
+      <div class="marquee-track right" id="track2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     TESTIMONIALS
+═══════════════════════════════════════ -->
+<section id="testimonials">
+  <div class="max-w">
+    <div class="section-center reveal">
+      <div class="section-label">Témoignages</div>
+      <h2 class="section-h2">Ils ont transformé <span class="grad">leurs appels entrants</span></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal" style="border:1px solid rgba(59,130,246,.2);">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote-icon" style="color:var(--b400);">"</div>
+        <div class="testi-text">Depuis VoiceCore, nous n'avons plus un seul appel manqué. Notre taux de conversion des prospects entrants a augmenté de 34% en 3 mois. L'agent est tellement naturel que certains clients ne réalisent même pas qu'ils parlent à une IA.</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:var(--b400);">SM</div>
+          <div>
+            <div class="testi-name">Sophie Marchand</div>
+            <div class="testi-role">Directrice — Clinique Dentaire Marchand</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal" style="border:1px solid rgba(6,182,212,.2);transition-delay:.1s">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote-icon" style="color:var(--c400);">"</div>
+        <div class="testi-text">On gère 80 logements en location courte durée. Avant VoiceCore, on perdait des réservations chaque nuit. Maintenant notre agent répond instantanément, renseigne les voyageurs et enregistre les réservations. ROI en 3 semaines.</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);color:var(--c400);">KB</div>
+          <div>
+            <div class="testi-name">Karim Benali</div>
+            <div class="testi-role">CEO — BK Property Management</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal" style="border:1px solid rgba(129,140,248,.2);transition-delay:.2s">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote-icon" style="color:#818cf8;">"</div>
+        <div class="testi-text">Notre cabinet reçoit 200+ appels/semaine. L'équipe était saturée. VoiceCore gère maintenant 70% des appels seul — prises de RDV, renseignements, confirmations. Mes collaborateurs se concentrent enfin sur les dossiers à valeur.</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(129,140,248,.15);border:1px solid rgba(129,140,248,.3);color:#818cf8;">LD</div>
+          <div>
+            <div class="testi-name">Maître Laurent Dupuis</div>
+            <div class="testi-role">Avocat — Cabinet Dupuis & Associés</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="proof-bar reveal">
+      <div class="proof-stat"><div class="proof-val">4.9/5</div><div class="proof-lbl">Note moyenne</div></div>
+      <div class="proof-stat"><div class="proof-val">200+</div><div class="proof-lbl">Clients actifs</div></div>
+      <div class="proof-stat"><div class="proof-val">98%</div><div class="proof-lbl">Satisfaction client</div></div>
+      <div class="proof-stat"><div class="proof-val">&lt;48h</div><div class="proof-lbl">Mise en production</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     PRICING
+═══════════════════════════════════════ -->
+<section id="pricing" style="padding:clamp(80px,10vw,120px) 24px;position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,var(--void) 0%,rgba(10,21,53,.3) 50%,var(--void) 100%);pointer-events:none;"></div>
+  <div class="max-w" style="position:relative;z-index:1;">
+    <div class="section-center reveal">
+      <div class="section-label">Tarifs transparents</div>
+      <h2 class="section-h2">Un investissement,<br><span class="grad">pas un coût</span></h2>
+    </div>
+    <div class="pricing-toggle reveal">
+      <span class="toggle-lbl active" id="lbl-monthly">Mensuel</span>
+      <button class="toggle-btn" id="toggle" onclick="togglePricing(this)">
+        <div class="toggle-knob"></div>
+      </button>
+      <span class="toggle-lbl" id="lbl-annual">Annuel <span class="save-tag">-15%</span></span>
+    </div>
+    <div class="pricing-grid">
+      <!-- Starter -->
+      <div class="plan-card reveal">
+        <div class="plan-name" style="color:var(--b400);">Starter</div>
+        <div class="plan-desc">Parfait pour lancer votre premier agent vocal</div>
+        <div class="plan-price">
+          <span class="plan-price-val" id="price-starter">290€</span>
+          <span class="plan-period">/mois</span>
+          <div class="plan-annual" id="annual-starter" style="display:none;">Facturé 2 988€/an</div>
+        </div>
+        <div class="plan-feats">
+          <div class="plan-feat"><span class="check" style="color:var(--b400);">✓</span>500 appels entrants / mois</div>
+          <div class="plan-feat"><span class="check" style="color:var(--b400);">✓</span>1 agent IA configuré</div>
+          <div class="plan-feat"><span class="check" style="color:var(--b400);">✓</span>Prise de RDV basique</div>
+          <div class="plan-feat"><span class="check" style="color:var(--b400);">✓</span>Rapport mensuel</div>
+          <div class="plan-feat"><span class="check" style="color:var(--b400);">✓</span>Support email</div>
+          <div class="plan-feat"><span class="check" style="color:var(--b400);">✓</span>Intégration Google Calendar</div>
+        </div>
+        <button class="plan-btn" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:var(--b400);">Commencer →</button>
+      </div>
+      <!-- Business -->
+      <div class="plan-card featured reveal" style="transition-delay:.1s">
+        <div class="plan-badge">⚡ Plus populaire</div>
+        <div class="plan-name" style="color:var(--c400);">Business</div>
+        <div class="plan-desc">Pour les entreprises qui ne veulent rien manquer</div>
+        <div class="plan-price">
+          <span class="plan-price-val" id="price-business">590€</span>
+          <span class="plan-period">/mois</span>
+          <div class="plan-annual" id="annual-business" style="display:none;">Facturé 5 988€/an</div>
+        </div>
+        <div class="plan-feats">
+          <div class="plan-feat"><span class="check" style="color:var(--c400);">✓</span>2 000 appels entrants / mois</div>
+          <div class="plan-feat"><span class="check" style="color:var(--c400);">✓</span>3 agents IA personnalisés</div>
+          <div class="plan-feat"><span class="check" style="color:var(--c400);">✓</span>Prise de RDV avancée + CRM</div>
+          <div class="plan-feat"><span class="check" style="color:var(--c400);">✓</span>Escalade intelligente</div>
+          <div class="plan-feat"><span class="check" style="color:var(--c400);">✓</span>Analytics temps réel</div>
+          <div class="plan-feat"><span class="check" style="color:var(--c400);">✓</span>Support prioritaire 7j/7</div>
+          <div class="plan-feat"><span class="check" style="color:var(--c400);">✓</span>Multi-langues (FR/EN/ES)</div>
+          <div class="plan-feat"><span class="check" style="color:var(--c400);">✓</span>Intégrations avancées</div>
+        </div>
+        <button class="plan-btn primary">Démarrer l'essai →</button>
+      </div>
+      <!-- Enterprise -->
+      <div class="plan-card reveal" style="transition-delay:.2s">
+        <div class="plan-name" style="color:#818cf8;">Enterprise</div>
+        <div class="plan-desc">Pour les groupes avec des volumes importants</div>
+        <div class="plan-price">
+          <div class="plan-devis">Sur devis</div>
+        </div>
+        <div class="plan-feats">
+          <div class="plan-feat"><span class="check" style="color:#818cf8;">✓</span>Volume illimité</div>
+          <div class="plan-feat"><span class="check" style="color:#818cf8;">✓</span>Agents IA illimités</div>
+          <div class="plan-feat"><span class="check" style="color:#818cf8;">✓</span>Personnalisation complète</div>
+          <div class="plan-feat"><span class="check" style="color:#818cf8;">✓</span>Intégration API custom</div>
+          <div class="plan-feat"><span class="check" style="color:#818cf8;">✓</span>SLA garanti 99.9%</div>
+          <div class="plan-feat"><span class="check" style="color:#818cf8;">✓</span>Account manager dédié</div>
+          <div class="plan-feat"><span class="check" style="color:#818cf8;">✓</span>Formation de l'équipe</div>
+          <div class="plan-feat"><span class="check" style="color:#818cf8;">✓</span>Audit trimestriel</div>
+        </div>
+        <button class="plan-btn" style="background:rgba(129,140,248,.15);border:1px solid rgba(129,140,248,.35);color:#818cf8;">Nous contacter</button>
+      </div>
+    </div>
+    <p class="plan-guarantee reveal">🛡️ Essai gratuit 14 jours · Sans engagement · Annulation à tout moment</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     FAQ
+═══════════════════════════════════════ -->
+<section id="faq">
+  <div class="faq-inner">
+    <div class="section-center reveal">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-h2">Questions fréquentes</h2>
+      <p class="section-p" style="margin-top:12px;">Tout ce que vous devez savoir avant de vous lancer.</p>
+    </div>
+    <div class="faq-list" id="faqList"></div>
+    <div class="faq-contact reveal">
+      <p>Vous avez d'autres questions ?</p>
+      <a href="mailto:contact@voicecore.ai">Parler à un expert →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     CTA FINAL
+═══════════════════════════════════════ -->
+<section id="cta">
+  <div class="cta-radial"></div>
+  <div class="cta-grid"></div>
+  <div class="cta-top-line"></div>
+  <div class="cta-inner">
+    <div class="badge reveal">
+      <span class="dot-live"></span>
+      Démo gratuite — 30 min
+    </div>
+    <h2 class="cta-h2 reveal">Prêt à ne plus jamais<br><span class="grad">manquer un appel ?</span></h2>
+    <p class="cta-sub reveal">Réservez une démo de 30 minutes. On vous montre votre agent en action, configuré pour votre activité — sans engagement.</p>
+    <div class="cta-btns reveal">
+      <a href="#" class="btn-primary" style="padding:18px 44px;font-size:17px;">📅 Réserver ma démo gratuite</a>
+      <a href="tel:+33000000000" class="btn-ghost" style="padding:18px 36px;font-size:17px;">📞 Nous appeler</a>
+    </div>
+    <div class="cta-trust reveal">
+      <span>✓ Sans engagement</span>
+      <span>✓ Mise en prod en 48h</span>
+      <span>✓ Annulation à tout moment</span>
+      <span>✓ RGPD compliant</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-icon">🎙️</div>
+          <span class="logo-text">Voice<span>Core</span></span>
+        </div>
+        <p>L'agence spécialiste de l'agent IA vocal pour les appels entrants. 100% français, 100% conforme.</p>
+        <div class="social-links">
+          <a class="social-btn" href="#">𝕏</a>
+          <a class="social-btn" href="#">in</a>
+          <a class="social-btn" href="#">YT</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Produit</div>
+        <div class="footer-col">
+          <a href="#">Fonctionnalités</a><a href="#">Intégrations</a><a href="#">Tarifs</a><a href="#">Changelog</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Usages</div>
+        <div class="footer-col">
+          <a href="#">Santé</a><a href="#">Immobilier</a><a href="#">Juridique</a><a href="#">Hôtellerie</a><a href="#">E-commerce</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Entreprise</div>
+        <div class="footer-col">
+          <a href="#">À propos</a><a href="#">Blog</a><a href="#">Partenaires</a><a href="#">Carrières</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Légal</div>
+        <div class="footer-col">
+          <a href="#">CGU</a><a href="#">Confidentialité</a><a href="#">RGPD</a><a href="#">Mentions légales</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2025 VoiceCore. Tous droits réservés. Fait en France 🇫🇷</span>
+      <div class="footer-badges">
+        <span class="fbadge">🔒 RGPD</span>
+        <span class="fbadge">🇪🇺 EU Hosting</span>
+        <span class="fbadge">⭐ 4.9/5</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════ -->
+<script>
+/* ── Navbar scroll ── */
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+/* ── Waveform ── */
+const wf = document.getElementById('waveform');
+const heights = [.3,.6,1,.8,.5,.9,.4,.7,1,.6,.3,.8,.5,1,.7,.4,.9,.6,.3,.8,1,.5,.7,.4,.9,.55,.75,.35];
+heights.forEach((h,i)=>{
+  const d = document.createElement('div');
+  d.className = 'wbar';
+  d.style.height = `${h*100}%`;
+  const dur = .8 + (i%5)*.15;
+  const del = i*.04;
+  d.style.animation = `waveBar ${dur}s ${del}s ease-in-out infinite`;
+  const colors = [
+    'linear-gradient(to top,#1d4ed8,#3b82f6)',
+    'linear-gradient(to top,#0284c7,#22d3ee)',
+    'linear-gradient(to top,#1d4ed8,#60a5fa)'
+  ];
+  d.style.background = colors[i%3];
+  wf.appendChild(d);
+});
+
+/* ── Use cases marquee ── */
+const useCases = [
+  {e:'🏥',s:'Santé & médical',u:'Prise de RDV patients'},
+  {e:'🏨',s:'Hôtellerie',u:'Réservations & conciergerie'},
+  {e:'⚖️',s:'Cabinets juridiques',u:'Qualification des dossiers'},
+  {e:'🏠',s:'Immobilier',u:'Qualification des prospects'},
+  {e:'🚗',s:'Automobile',u:'SAV & prises d\'essai'},
+  {e:'🍽️',s:'Restauration',u:'Réservations de tables'},
+  {e:'💇',s:'Beauté & bien-être',u:'Planning & rappels'},
+  {e:'🏗️',s:'BTP & artisans',u:'Devis & planification'},
+  {e:'🏋️',s:'Sport & fitness',u:'Abonnements & cours'},
+  {e:'📦',s:'E-commerce',u:'SAV & suivi commandes'},
+  {e:'🎓',s:'Formation',u:'Info & inscriptions'},
+  {e:'🏦',s:'Finance & assurance',u:'Qualification & orientation'},
+];
+function makeCard(item){
+  return `<div class="uc-card"><span class="uc-emoji">${item.e}</span><div><div class="uc-sector">${item.s}</div><div class="uc-usage">${item.u}</div></div></div>`;
+}
+const t1 = document.getElementById('track1');
+const t2 = document.getElementById('track2');
+const row1 = useCases.slice(0,6);
+const row2 = useCases.slice(6);
+// Duplicate for seamless loop
+t1.innerHTML = [...row1,...row1].map(makeCard).join('');
+t2.innerHTML = [...row2,...row2].map(makeCard).join('');
+
+/* ── FAQ ── */
+const faqs = [
+  {q:"Est-ce que l'agent sonne vraiment naturel ?",a:"Oui — nos agents utilisent des modèles de synthèse vocale de dernière génération, entraînés spécifiquement pour le français conversationnel. Les clients décrivent l'expérience comme \"indiscernable d'un humain\". Nous proposons une démonstration live pour que vous jugiez par vous-même."},
+  {q:"Combien de temps pour être opérationnel ?",a:"En standard, 48 heures après la signature. Nous collectons vos informations clés (FAQ, scripts, agenda), configurons et testons votre agent, puis vous livrons clé en main. Pour les configurations complexes, comptez 5 à 7 jours."},
+  {q:"Que se passe-t-il si l'IA ne sait pas répondre ?",a:"L'agent est programmé pour reconnaître les situations qui dépassent ses capacités. Il transfère alors l'appel au bon collaborateur en temps réel, avec un résumé vocal du contexte de l'appel. Aucun client n'est laissé sans réponse."},
+  {q:"Est-ce compatible avec mon système de réservation actuel ?",a:"VoiceCore s'intègre nativement avec Google Calendar, Calendly, Doctolib, Planity, Salesforce, HubSpot et plus de 50 autres outils via API. Pour les systèmes propriétaires, nous développons des connecteurs sur mesure."},
+  {q:"Les données de mes clients sont-elles protégées ?",a:"Totalement. Hébergement en France (OVH Cloud), chiffrement AES-256 en transit et au repos, aucune donnée partagée avec des tiers. VoiceCore est conforme RGPD, et nous vous fournissons un DPA dès l'onboarding."},
+  {q:"Puis-je personnaliser la voix et le ton de l'agent ?",a:"Oui. Vous choisissez parmi 12 voix (hommes et femmes, différents accents), définissez le ton (formel, chaleureux, expert), les formules de politesse, et le nom de votre agent. Tout peut être ajusté après mise en production."},
+  {q:"Quel est l'engagement minimal ?",a:"Aucun engagement pour les offres Starter et Business — résiliation à tout moment avec 30 jours de préavis. L'offre Enterprise inclut un engagement annuel avec des conditions négociées selon le volume."},
+];
+const faqList = document.getElementById('faqList');
+faqs.forEach((f,i)=>{
+  const item = document.createElement('div');
+  item.className = 'faq-item reveal';
+  item.style.transitionDelay = `${i*.05}s`;
+  item.innerHTML = `
+    <button class="faq-q" onclick="toggleFaq(${i})">
+      <span class="faq-q-text">${f.q}</span>
+      <div class="faq-icon" id="faq-icon-${i}">+</div>
+    </button>
+    <div class="faq-a" id="faq-a-${i}">
+      <div class="faq-a-text">${f.a}</div>
+    </div>`;
+  faqList.appendChild(item);
+});
+let openFaq = null;
+function toggleFaq(i){
+  const item = faqList.children[i];
+  const ans = document.getElementById(`faq-a-${i}`);
+  const icon = document.getElementById(`faq-icon-${i}`);
+  if(openFaq !== null && openFaq !== i){
+    const prev = faqList.children[openFaq];
+    prev.classList.remove('open');
+  }
+  if(openFaq === i){
+    item.classList.remove('open');
+    openFaq = null;
+  } else {
+    item.classList.add('open');
+    openFaq = i;
+  }
+}
+
+/* ── Pricing toggle ── */
+const prices = {starter:{monthly:'290€',annual:'249€'},business:{monthly:'590€',annual:'499€'}};
+let isAnnual = false;
+function togglePricing(btn){
+  isAnnual = !isAnnual;
+  btn.classList.toggle('on', isAnnual);
+  document.getElementById('lbl-monthly').classList.toggle('active',!isAnnual);
+  document.getElementById('lbl-annual').classList.toggle('active',isAnnual);
+  document.getElementById('price-starter').textContent = isAnnual ? prices.starter.annual : prices.starter.monthly;
+  document.getElementById('price-business').textContent = isAnnual ? prices.business.annual : prices.business.monthly;
+  document.getElementById('annual-starter').style.display = isAnnual ? 'block' : 'none';
+  document.getElementById('annual-business').style.display = isAnnual ? 'block' : 'none';
+}
+
+/* ── Animated counters ── */
+function animateCounter(el){
+  const target = parseFloat(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  const decimals = parseInt(el.dataset.decimals || '0');
+  const duration = 2200;
+  const step = target / duration * 16;
+  let current = 0;
+  const timer = setInterval(()=>{
+    current += step;
+    if(current >= target){ current = target; clearInterval(timer); }
+    el.textContent = (decimals > 0 ? current.toFixed(decimals) : Math.floor(current)) + suffix;
+  }, 16);
+}
+
+/* ── Intersection observer (reveal + counters) ── */
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      // animate counters inside
+      e.target.querySelectorAll('[data-target]').forEach(animateCounter);
+      observer.unobserve(e.target);
+    }
+  });
+},{threshold:.12, rootMargin:'0px 0px -60px 0px'});
+
+// Also observe stat items directly
+document.querySelectorAll('.reveal, .stat-item').forEach(el=>{
+  observer.observe(el);
+});
+// Handle stat counters that are not inside .reveal
+document.querySelectorAll('.stat-item [data-target]').forEach(el=>{
+  const parent = el.closest('.stat-item');
+  const counterObs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ animateCounter(el); counterObs.unobserve(e.target); }
+    });
+  },{threshold:.5});
+  counterObs.observe(parent);
+});
+</script>
+</body>
+</html>
